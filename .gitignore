@@ -1,0 +1,6 @@
+*.pyc 
+MANIFEST
+README.txt
+dist/
+.mypy_cache/
+.vscode/
