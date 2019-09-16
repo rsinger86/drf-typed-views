@@ -3,6 +3,4 @@ from rest_framework import routers
 from test_project.testapp.views import get_logs
 
 
-urlpatterns = [
-    url(r"^get-logs/", get_logs, name="get-logs"),
-]
+urlpatterns = [url(r"^logs/(?P<id>[0-9])", get_logs, name="logs")]
