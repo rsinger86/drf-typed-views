@@ -1,55 +1,54 @@
 import functools
 import inspect
-from typing import Any, Dict, List, Mapping, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import ValidationError
+from rest_framework.fields import empty
+from rest_framework.request import Request
 
-from .classes import GenericRequest, Missing
-from .param_settings import (
-    BodyParam,
-    CurrentRequestParam,
-    CurrentUserParam,
-    PathParam,
-    QueryParam,
-)
-from .schemas import (
-    BodySchema,
-    CurrentRequestSchema,
-    CurrentUserSchema,
-    PathSchema,
-    QuerySchema,
-)
+from .param_settings import ParamSettings
+from .params import BodyParam, CurrentUserParam, PathParam, QueryParam
 
-Path = PathParam
-Query = QueryParam
-Body = BodyParam
-CurrentUser = CurrentUserParam
-CurrentRequest = CurrentRequestParam
+
+def Query(*args, **kwargs):
+    return ParamSettings("query_param", *args, **kwargs)
+
+
+def Path(*args, **kwargs):
+    return ParamSettings("path", *args, **kwargs)
+
+
+def CurrentUser(*args, **kwargs):
+    return ParamSettings("current_user", *args, **kwargs)
+
+
+def Body(*args, **kwargs):
+    return ParamSettings("body", *args, **kwargs)
+
+
+def Param(*args, **kwargs):
+    return ParamSettings(*args, **kwargs)
 
 
 def get_default_value(param: inspect.Parameter) -> Any:
     if (
-        not is_param_default_used_to_pass_schema(param)
+        not is_default_used_to_pass_settings(param)
         and param.default is not inspect.Parameter.empty
     ):
         return param.default
-    return Missing
+    return empty
 
 
-def is_param_default_used_to_pass_schema(param: inspect.Parameter) -> bool:
+def is_default_used_to_pass_settings(param: inspect.Parameter) -> bool:
     return get_declared_param_settings(param) is not None
 
 
-def get_declared_param_settings(param: inspect.Parameter):
-    if (
-        isinstance(param.default, PathParam)
-        or isinstance(param.default, QueryParam)
-        or isinstance(param.default, BodyParam)
-        or isinstance(param.default, CurrentUserParam)
-        or isinstance(param.default, CurrentRequestParam)
-    ):
+def get_declared_param_settings(param: inspect.Parameter) -> Optional[ParamSettings]:
+    try:
+        param_type = param.default.param_type
         return param.default
-    else:
+    except AttributeError:
         return None
 
 
@@ -58,38 +57,44 @@ def is_implicit_body_param(param: inspect.Parameter) -> bool:
 
 
 def transform_path_param(
-    name: str, param: inspect.Parameter, original_kwargs: dict
-) -> PathSchema:
-    param_settings = get_declared_param_settings(param) or PathParam(
-        default=get_default_value(param)
+    name: str, param: inspect.Parameter, request: Request, original_kwargs: dict
+) -> PathParam:
+    param_settings = get_declared_param_settings(param) or ParamSettings(
+        param_type="path", default=get_default_value(param)
     )
 
-    return PathSchema(
-        name, param, settings=param_settings, raw_value=original_kwargs.get(name)
+    return PathParam(
+        name,
+        param,
+        request,
+        settings=param_settings,
+        raw_value=original_kwargs.get(name),
     )
 
 
-def transform_non_path_param(
-    request: GenericRequest, name: str, param: inspect.Parameter
-):
+def transform_non_path_param(request: Request, name: str, param: inspect.Parameter):
     param_settings = get_declared_param_settings(param)
     default_value = get_default_value(param)
 
-    if param_settings and param_settings.type == "body":
-        return BodySchema(name, param, request, settings=param_settings)
-    elif param_settings and param_settings.type == "query":
-        return QuerySchema(name, param, request, settings=param_settings)
-    elif param_settings and param_settings.type == "current_request":
-        return CurrentRequestSchema(name, param, request, settings=param_settings)
-    elif param_settings and param_settings.type == "current_user":
-        return CurrentUserSchema(name, param, request, settings=param_settings)
+    if param_settings and param_settings.param_type == "body":
+        return BodyParam(name, param, request, settings=param_settings)
+    if param_settings and param_settings.param_type == "current_user":
+        return CurrentUserParam(name, param, request, settings=param_settings)
+    if param_settings and param_settings.param_type == "query_param":
+        return QueryParam(name, param, request, settings=param_settings)
     elif is_implicit_body_param(param):
-        return BodySchema(
-            name, param, request, settings=BodyParam(default=default_value)
+        return BodyParam(
+            name,
+            param,
+            request,
+            settings=ParamSettings(param_type="body", default=default_value),
         )
     else:
-        return QuerySchema(
-            name, param, request, settings=QueryParam(default=default_value)
+        return QueryParam(
+            name,
+            param,
+            request,
+            settings=ParamSettings(param_type="query_param", default=default_value),
         )
 
 
@@ -127,17 +132,15 @@ def validate_path_params(
     for name, param in path_params:
         declared_settings = get_declared_param_settings(param)
 
-        if declared_settings and declared_settings.type != "path":
+        if declared_settings and declared_settings.param_type != "path":
             raise Exception(
                 f"{name} was passed into the view as a path parameter but you've "
                 f"declared it with parameter settings for {declared_settings.type}"
             )
 
 
-def transform_input_params(
-    original_func, original_args: List[Any], original_kwargs: dict
-):
-    request = GenericRequest(original_args[0])
+def transform_args(original_func, original_args: List[Any], original_kwargs: dict):
+    request = original_args[0]
     typed_params = inspect.signature(original_func).parameters
     transformed_args = []
 
@@ -145,30 +148,33 @@ def transform_input_params(
         typed_params, original_kwargs
     )
 
+    params, errors = [], {}
+
     for name, param in path_params:
-        transformed_args.append(transform_path_param(name, param, original_kwargs))
+        params.append(transform_path_param(name, param, request, original_kwargs))
 
     for name, param in non_path_params:
-        transformed_args.append(transform_non_path_param(request, name, param))
+        params.append(transform_non_path_param(request, name, param))
 
-    return [arg.get_value() for arg in transformed_args]
+    for param in params:
+        value, error = param.validate_or_error()
 
+        if error:
+            errors.update(error)
+        else:
+            transformed_args.append(value)
 
-def typed_view(view):
-    @functools.wraps(view)
-    def validate_and_render(*raw_args, **raw_kwargs):
-        data = view(*args, **kwargs)
-        return data
+    if len(errors) > 0:
+        raise ValidationError(errors)
 
-    return validate_and_render
+    return transformed_args
 
 
 def typed_api_view(methods):
     def wrap_validate_and_render(view):
         @api_view(methods)
         def wrapper(*original_args, **original_kwargs):
-            transformed = transform_input_params(view, original_args, original_kwargs)
-            print("!!", transformed)
+            transformed = transform_args(view, original_args, original_kwargs)
             return view(*transformed)
 
         return wrapper
