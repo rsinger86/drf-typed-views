@@ -6,7 +6,13 @@ from typing import Any, List
 from rest_framework import serializers
 
 from typed_views.param_settings import ParamSettings
-from typed_views.utils import parse_enum_annotation, parse_list_annotation
+from typed_views.utils import (
+    parse_complex_type,
+    parse_enum_annotation,
+    parse_list_annotation,
+)
+from typed_views.validators import TypeSystemValidator
+from typed_views.validators import PydanticValidator
 
 
 class ValidatorFactory(object):
@@ -72,12 +78,22 @@ class ValidatorFactory(object):
             return serializers.IPAddressField(default=settings.default, protocol="both")
 
     @classmethod
+    def make_list_validator(cls, item_type: Any, settings: ParamSettings):
+        options = {"min_length": settings.min_length, "max_length": settings.max_length}
+        if item_type is not Any:
+            options["child"] = ValidatorFactory.make(
+                item_type, settings.child or ParamSettings()
+            )
+
+        return serializers.ListField(**options)
+
+    @classmethod
     def make(cls, annotation: Any, settings: ParamSettings):
         if annotation is bool:
             return serializers.BooleanField(default=settings.default)
 
         if annotation is str:
-            cls.make_string_validator(settings)
+            return cls.make_string_validator(settings)
 
         if annotation is int:
             return serializers.IntegerField(
@@ -133,13 +149,12 @@ class ValidatorFactory(object):
         is_list_type, item_type = parse_list_annotation(annotation)
 
         if is_list_type:
-            options = {
-                "min_length": settings.min_length,
-                "max_length": settings.max_length,
-            }
-            if item_type is not Any:
-                options["child"] = ValidatorFactory.make(
-                    item_type, settings.child or ParamSettings()
-                )
+            return cls.make_list_validator(item_type, settings)
 
-            return serializers.ListField(**options)
+        is_complex_type, package = parse_complex_type(annotation)
+
+        if is_complex_type and package == "pydantic":
+            return PydanticValidator(annotation)
+
+        if is_complex_type and package == "typesystem":
+            return TypeSystemValidator(annotation)

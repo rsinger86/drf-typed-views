@@ -5,12 +5,14 @@ from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Mapping, Tuple
 
+import typesystem
 from django.contrib.auth.models import User
 from django.shortcuts import render
+from pydantic import BaseModel
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from typed_views import CurrentUser, Path, Query, Param, typed_api_view
+from typed_views import Body, CurrentUser, Param, Path, Query, typed_api_view
 
 
 """
@@ -25,13 +27,43 @@ class BagOptions(str, Enum):
     plastic = "plastic"
 
 
+class SuperUser(BaseModel):
+    id: int
+    name = "John Doe"
+    signup_ts: datetime = None
+    friends: List[int] = []
+
+
+class Booking(typesystem.Schema):
+    start_date = typesystem.Date()
+    end_date = typesystem.Date()
+    room = typesystem.Choice(
+        choices=[
+            ("double", "Double room"),
+            ("twin", "Twin room"),
+            ("single", "Single room"),
+        ]
+    )
+    include_breakfast = typesystem.Boolean(title="Include breakfast", default=False)
+
+
+@typed_api_view(["POST"])
+def create_user(user: SuperUser):
+    return Response(user.json())
+
+
+@typed_api_view(["POST"])
+def create_booking(booking: Booking = Body(source="_data.item")):
+    return Response(dict(booking))
+
+
 @typed_api_view(["GET"])
 def get_logs(
-    id: int,
+    idddd: int = Path(source="id"),
     latitude: Decimal = Query(decimal_places=20),
     title: str = Query(min_length=6),
     price: float = Query(min_value=6),
-    # user: User = CurrentUser(),
+    # = user: User = CurrentUser(),
     is_pretty: bool = Query(),
     email: str = Query(format="email"),
     upper_alpha_string: str = Query(regex=r"^[A-Z]+$"),
@@ -49,7 +81,7 @@ def get_logs(
 ):
     return Response(
         {
-            "id": id,
+            "idddd": idddd,
             "title": title,
             "price": price,
             "latitude": latitude,

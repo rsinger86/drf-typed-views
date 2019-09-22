@@ -7,6 +7,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.request import Request
 
+from typed_views.utils import parse_complex_type
+
 from .param_settings import ParamSettings
 from .params import BodyParam, CurrentUserParam, PathParam, QueryParam
 
@@ -53,7 +55,8 @@ def get_declared_param_settings(param: inspect.Parameter) -> Optional[ParamSetti
 
 
 def is_implicit_body_param(param: inspect.Parameter) -> bool:
-    return False
+    is_complex_type, package = parse_complex_type(param.annotation)
+    return is_complex_type
 
 
 def transform_path_param(
@@ -63,12 +66,14 @@ def transform_path_param(
         param_type="path", default=get_default_value(param)
     )
 
+    kwarg_name = param_settings.source or name
+
     return PathParam(
         name,
         param,
         request,
         settings=param_settings,
-        raw_value=original_kwargs.get(name),
+        raw_value=original_kwargs.get(kwarg_name),
     )
 
 
@@ -112,30 +117,25 @@ def divide_path_and_non_path_params(
         )
 
     path_params, non_path_params = params[:kwarg_count], params[kwarg_count:]
-    validate_path_params(path_params, original_kwargs)
     return path_params, non_path_params
 
 
-def validate_path_params(
-    path_params: List[Tuple[str, inspect.Parameter]], original_kwargs: dict
-):
-    param_names = [name for name, param in path_params]
+def validate_path_params(path_params: List[PathParam], original_kwargs: dict):
+    param_keys = [param.settings.source or param.name for param in path_params]
 
     for kwarg_name in original_kwargs:
-        if kwarg_name not in param_names:
+        if kwarg_name not in param_keys:
             raise Exception(
                 f"The argument {kwarg_name} was captured as a path parameter "
                 f"and passed to your typed view function, "
                 f"but is unspecified in the function's signature"
             )
 
-    for name, param in path_params:
-        declared_settings = get_declared_param_settings(param)
-
-        if declared_settings and declared_settings.param_type != "path":
+    for param in path_params:
+        if param.settings.param_type != "path":
             raise Exception(
-                f"{name} was passed into the view as a path parameter but you've "
-                f"declared it with parameter settings for {declared_settings.type}"
+                f"{param.name} was passed into the view as a path parameter but you've "
+                f"declared it with parameter settings for {param.settings.param_type}"
             )
 
 
@@ -152,6 +152,7 @@ def transform_args(original_func, original_args: List[Any], original_kwargs: dic
 
     for name, param in path_params:
         params.append(transform_path_param(name, param, request, original_kwargs))
+        validate_path_params(params, original_kwargs)
 
     for name, param in non_path_params:
         params.append(transform_non_path_param(request, name, param))

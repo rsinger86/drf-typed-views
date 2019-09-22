@@ -6,7 +6,7 @@ from rest_framework.fields import Field
 
 from typed_views import Request, empty
 from typed_views.param_settings import ParamSettings
-from typed_views.utils import parse_list_annotation
+from typed_views.utils import get_nested_value, parse_list_annotation
 from typed_views.validators import ValidatorFactory
 
 
@@ -47,12 +47,16 @@ class Param(object):
 
 class QueryParam(Param):
     def _get_raw_value(self):
-        raw = self.request.query_params.get(self._source, empty)
-        raw = empty if raw == "" else raw
-        is_list_type, item_type = parse_list_annotation(self.param.annotation)
+        if self.settings.source == "*":
+            raw = self.request.query_params.dict()
+        else:
+            key = self.settings.source or self.name
+            raw = self.request.query_params.get(key, empty)
+            raw = empty if raw == "" else raw
+            is_list_type, item_type = parse_list_annotation(self.param.annotation)
 
-        if raw is not empty and is_list_type:
-            raw = raw.split(self.settings.delimiter)
+            if raw is not empty and is_list_type:
+                raw = raw.split(self.settings.delimiter)
 
         return raw
 
@@ -65,7 +69,9 @@ class PathParam(Param):
 
 class BodyParam(Param):
     def _get_raw_value(self):
-        return self.request.data
+        if self.settings.source in ("*", None):
+            return self.request.data
+        return get_nested_value(self.request.data, self.settings.source)
 
 
 class HeaderParam(Param):
@@ -75,4 +81,6 @@ class HeaderParam(Param):
 
 class CurrentUserParam(Param):
     def _get_raw_value(self):
-        return self.request.user
+        if self.settings.source in ("*", None):
+            return self.request.user
+        return get_nested_value(self.request.data, self.settings.source)

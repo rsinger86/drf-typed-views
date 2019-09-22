@@ -4,3 +4,4 @@ README.txt
 dist/
 .mypy_cache/
 .vscode/
+db.sqlite3
