@@ -27,18 +27,17 @@ def get_users(
     print(type, registered_after, login_count__gte, groups, is_staff)
 ```
 
-**200** - GET `/users/registered/?registered_after=2019-03-03&login_count__gte=3&groups=admin,manager&is_staff=yes`
+GET `/users/registered/?registered_after=2019-03-03&logins__gte=3&groups=admin,manager&is_staff=yes` - *Status 200*
 ```
     'registered'  date(2019, 3, 03)   3  ['admin', 'manager']  True
 ```
 
-**400** - GET `/users/banned/?registered_after=9999-99-99&login_count__gte=huge number&groups=1,4&is_staff=maybe`
-
+GET `/users/banned/?registered_after=9999&logins__gte=hugge&groups=1&is_staff=maybe` - *Status 400*
 ```json
     {
         "type": "`troll` is not a valid for UserType",
-        "registered_after": "'9999-99-99' is not a valid date",
-        "login_count__gte": "'huge number' is not a valid integer",
+        "registered_after": "'9999' is not a valid date",
+        "logins__gte": "'hugge' is not a valid integer",
         "groups": "1 is not a valid string",
         "is_staff": "'maybe' is not a valid boolean"
 
