@@ -9,22 +9,40 @@ More features:
   - validate string formats like `email`, `uuid` and `ipv4/6`
   - validate lists, applying all the same rules to the items
   - use Python's native `Enum` type for `choices` validation
-  - almost all format/schema rules from Django REST's serializer fields are supported, including validating file paths
-- Provides decorators for working with function-based views, ViewSet methods
-and class-based views
 
-An example:
+Quick example:
 ```python
-# urls.py
-urlpatterns = [url(r"^movies/(?P<year>\d{4}-\d{2}-\d{2})/", search_movies_by_year)]
+class UserType(Enum):
+    trial = "trial"
+    registered = "registered"
 
-# ValidationError raised if request params do not match types
 @typed_api_view(["GET"])
-def search_movies_by_year(
-    year: date, # from URL
-    title: str, # from query params
-    actors: List[str] = None, # from query params; has default, so optional
+def get_users(
+    type: UserType,
+    registered_after: date = None, 
+    login_count__gte: int = None,
+    groups: List[str] = None,
+    is_staff: bool = None
 ):
+    print(type, registered_after, login_count__gte, groups, is_staff)
+```
+
+**200** - GET `/users/registered/?registered_after=2019-03-03&login_count__gte=3&groups=admin,manager&is_staff=yes`
+```
+    'registered'  date(2019, 3, 03)   3  ['admin', 'manager']  True
+```
+
+**400** - GET `/users/banned/?registered_after=9999-99-99&login_count__gte=huge number&groups=1,4&is_staff=maybe`
+
+```json
+    {
+        "type": "`troll` is not a valid for UserType",
+        "registered_after": "'9999-99-99' is not a valid date",
+        "login_count__gte": "'huge number' is not a valid integer",
+        "groups": "1 is not a valid string",
+        "is_staff": "'maybe' is not a valid boolean"
+
+    }
 ```
 
 ## Inspiration
