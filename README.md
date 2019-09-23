@@ -1,9 +1,19 @@
 ## Django REST Framework - Typed Views
 
-This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for readable, ergonomic code: views/controllers for web APIs read like functions with well-defined parameters, not buried inside  all-encompassing `request` objects. It also removes the need for repetitive validation logic.
+This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for code that is easier to read and write: arguments for views are nicely detailed/enumerated, not buried inside all-encompassing `request` objects, and you can stop writing repetitive validation logic.
 
-[Pydantic](https://pydantic-docs.helpmanual.io/) models are compatible types for view parameters -- meaning you can use them to automatically validate POST data as an alternative to DRF's serializers.
+More features:
+- [Pydantic](https://pydantic-docs.helpmanual.io/) models and [TypeSystem](https://www.encode.io/typesystem/) schemas are compatible types for view parameters. Annotate your POST/PUT functions with them to automatically validate incoming request bodies and hydrate models.
+- Advanced validators for more than just the type:
+  - apply `min_value`/`max_value` rules to incoming numbers
+  - validate string formats like `email`, `uuid` and `ipv4/6`
+  - validate lists, applying all the same rules to the items
+  - use Python's native `Enum` type for `choices` validation
+  - almost all format/schema rules from Django REST's serializer fields are supported, including validating file paths
+- Provides decorators for working with function-based views, ViewSet methods
+and class-based views
 
+An example:
 ```python
 # urls.py
 urlpatterns = [url(r"^movies/(?P<year>\d{4}-\d{2}-\d{2})/", search_movies_by_year)]
@@ -24,3 +34,16 @@ I first came across type annotations for validation in APIStar, which has since 
 ## Motivation
 
 While REST Framework's ModelViewSets and ModelSerializers are very productive when building out CRUD resources, I've felt less productive in the framework when developing other types of operations. Serializers are a powerful and flexible way to validate incoming request data, but are not as self-documenting as the type annotation approach. Furthermore, the Django ecosystem is hugely productive and I see no reason why REST Framework cannot also take advantage of Python 3 features, just like the libraries and frameworks mentioned above.
+
+## How It Works: Simple Usage
+
+For many cases, you can rely on some implicit behavior for how different parts of the request (URL path variables, query parameters, body) map to the parameters of a view function/method. 
+
+*The value of a view parameter will come from...*
+- a URL path variable if that path variable and the view argument have the same name, **or**:
+- the request body if the view argument is annotated using a class from a supported library for complex object validation (Pydantic, TypeSystem), **or**
+- a query parameter with the same name, if neither of the first rules apply
+
+Furthermore, the parameter is required, unless a default value is given.
+
+## How It Works: Advanced Usage
