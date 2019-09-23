@@ -27,12 +27,14 @@ def get_users(
     print(type, registered_after, login_count__gte, groups, is_staff)
 ```
 
-GET `/users/registered/?registered_after=2019-03-03&logins__gte=3&groups=admin,manager&is_staff=yes` - *Status 200*
+GET `/users/registered/?registered_after=2019-03-03&logins__gte=3&groups=admin,manager&is_staff=yes`<br>
+*Status Code: 200*
 ```
     'registered'  date(2019, 3, 03)   3  ['admin', 'manager']  True
 ```
 
-GET `/users/banned/?registered_after=9999&logins__gte=hugge&groups=1&is_staff=maybe` - *Status 400*
+GET `/users/troll/?registered_after=9999&logins__gte=hugge&groups=1&is_staff=maybe`<br>
+*Status Code: 400* (ValidationError raised)
 ```json
     {
         "type": "`troll` is not a valid for UserType",
@@ -40,7 +42,6 @@ GET `/users/banned/?registered_after=9999&logins__gte=hugge&groups=1&is_staff=ma
         "logins__gte": "'hugge' is not a valid integer",
         "groups": "1 is not a valid string",
         "is_staff": "'maybe' is not a valid boolean"
-
     }
 ```
 
