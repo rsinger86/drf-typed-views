@@ -28,13 +28,13 @@ def get_users(
 ```
 
 GET `/users/registered/?registered_after=2019-03-03&logins__gte=3&groups=admin,manager&is_staff=yes`<br>
-**Status Code: 200**
+Status Code: **200**
 ```
     'registered'  date(2019, 3, 03)   3  ['admin', 'manager']  True
 ```
 
 GET `/users/troll/?registered_after=9999&logins__gte=hugge&groups=1&is_staff=maybe`<br>
-**Status Code: 400** *ValidationError raised*
+Status Code: **400** *ValidationError raised*
 ```json
     {
         "type": "`troll` is not a valid for UserType",
