@@ -2,12 +2,15 @@ appdirs==1.4.3
 attrs==19.1.0
 black==19.3b0
 Click==7.0
-Django==2.2.1
-djangorestframework==3.9.3
+dataclasses==0.6
+Django==2.2.5
+djangorestframework==3.10.3
 mypy==0.720
 mypy-extensions==0.4.1
+pydantic==0.32.2
 pytz==2019.1
 sqlparse==0.3.0
 toml==0.10.0
 typed-ast==1.4.0
+typesystem==0.2.4
 typing-extensions==3.7.4
