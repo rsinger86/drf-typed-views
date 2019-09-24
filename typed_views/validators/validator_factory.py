@@ -11,8 +11,11 @@ from typed_views.utils import (
     parse_enum_annotation,
     parse_list_annotation,
 )
-from typed_views.validators import TypeSystemValidator
-from typed_views.validators import PydanticValidator
+from typed_views.validators import (
+    DefaultValidator,
+    PydanticValidator,
+    TypeSystemValidator,
+)
 
 
 class ValidatorFactory(object):
@@ -158,3 +161,5 @@ class ValidatorFactory(object):
 
         if is_complex_type and package == "typesystem":
             return TypeSystemValidator(annotation)
+
+        return DefaultValidator(default=settings.default)

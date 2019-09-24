@@ -13,13 +13,11 @@ from typed_views.validators import ValidatorFactory
 class Param(object):
     def __init__(
         self,
-        name: str,
         param: inspect.Parameter,
         request: Request,
         settings: ParamSettings,
         raw_value: Any = empty,
     ):
-        self.name = name
         self.param = param
         self.request = request
         self.settings = settings
@@ -33,7 +31,7 @@ class Param(object):
 
     @property
     def _source(self) -> str:
-        return self.settings.source or self.name
+        return self.settings.source or self.param.name
 
     def validate_or_error(self) -> Tuple[Any, Any]:
         validator = self._get_validator()
@@ -50,7 +48,7 @@ class QueryParam(Param):
         if self.settings.source == "*":
             raw = self.request.query_params.dict()
         else:
-            key = self.settings.source or self.name
+            key = self.settings.source or self.param.name
             raw = self.request.query_params.get(key, empty)
             raw = empty if raw == "" else raw
             is_list_type, item_type = parse_list_annotation(self.param.annotation)
@@ -67,11 +65,19 @@ class PathParam(Param):
         return raw
 
 
+class PassThruParam(object):
+    def __init__(self, value: Any):
+        self.value = value
+
+    def validate_or_error(self) -> Tuple[Any, Any]:
+        return self.value, None
+
+
 class BodyParam(Param):
     def _get_raw_value(self):
         if self.settings.source in ("*", None):
             return self.request.data
-        return get_nested_value(self.request.data, self.settings.source)
+        return get_nested_value(self.request.data, self.settings.source, fallback={})
 
 
 class HeaderParam(Param):

@@ -47,21 +47,21 @@ Status Code: **400** *ValidationError raised*
 
 ## Inspiration
 
-I first came across type annotations for validation in APIStar, which has since evolved into an APItoolkit. This pattern was also introduced and used by [Hug](https://hugapi.github.io/hug/) and [Molten](https://github.com/Bogdanp/molten) (I believe in that order). Furthermore, I've borrowed ideas from FastAPI, specifically its use of default values to declare additional validation rules. Finally, this [blog post](https://instagram-engineering.com/types-for-python-http-apis-an-instagram-story-d3c3a207fdb7) from Instagram's engineering team showed me how decorators can be used to implement these features on view functions.
+I first came across type annotations for validation in [API Star](https://github.com/encode/apistar), which has since evolved into an OpenAPI toolkit. This pattern was also offered by [Hug](https://hugapi.github.io/hug/) and [Molten](https://github.com/Bogdanp/molten) (I believe in that order). Furthermore, I've borrowed ideas from [FastAPI](https://github.com/tiangolo/fastapi), specifically its use of default values to declare additional validation rules. Finally, this [blog post](https://instagram-engineering.com/types-for-python-http-apis-an-instagram-story-d3c3a207fdb7) from Instagram's engineering team showed me how decorators can be used to implement these features on view functions.
 
 ## Motivation
 
-While REST Framework's ModelViewSets and ModelSerializers are very productive when building out CRUD resources, I've felt less productive in the framework when developing other types of operations. Serializers are a powerful and flexible way to validate incoming request data, but are not as self-documenting as the type annotation approach. Furthermore, the Django ecosystem is hugely productive and I see no reason why REST Framework cannot also take advantage of Python 3 features, just like the libraries and frameworks mentioned above.
+While REST Framework's ModelViewSets and ModelSerializers are very productive when building out CRUD resources, I've felt less productive in the framework when developing other types of operations. Serializers are a powerful and flexible way to validate incoming request data, but are not as self-documenting as type annotations. Furthermore, the Django ecosystem is hugely productive and I see no reason why REST Framework cannot take advantage of more Python 3 features.
 
 ## How It Works: Simple Usage
 
 For many cases, you can rely on some implicit behavior for how different parts of the request (URL path variables, query parameters, body) map to the parameters of a view function/method. 
 
-*The value of a view parameter will come from...*
-- a URL path variable if that path variable and the view argument have the same name, **or**:
-- the request body if the view argument is annotated using a class from a supported library for complex object validation (Pydantic, TypeSystem), **or**
+The value of a view parameter will come from...
+- the URL path if the path variable and the view argument have the same name, *or*:
+- the request body if the view argument is annotated using a class from a supported library for complex object validation (Pydantic, TypeSystem), *or*
 - a query parameter with the same name, if neither of the first rules apply
 
-Furthermore, the parameter is required, unless a default value is given.
+Unless a default value is given, the parameter is **required** and a `ValidationError` will be raised if it is not set.
 
 ## How It Works: Advanced Usage

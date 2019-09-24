@@ -28,8 +28,8 @@ def parse_complex_type(annotation) -> Tuple[bool, Optional[str]]:
     return False, None
 
 
-def get_nested_value(dic: dict, path: str) -> Any:
+def get_nested_value(dic: dict, path: str, fallback=None) -> Any:
     try:
         return reduce(operator.getitem, path.split("."), dic)
     except (TypeError, KeyError, ValueError):
-        return None
+        return fallback
