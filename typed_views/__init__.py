@@ -69,17 +69,6 @@ def is_implicit_request_param(param: inspect.Parameter) -> bool:
     return param.name == "request" and param.annotation is inspect.Parameter.empty
 
 
-def is_implicit_view_set_param(param: inspect.Parameter, original_args: list) -> bool:
-    if param.name != "self":
-        return False
-
-    for arg in original_args:
-        if issubclass(type(arg), APIView):
-            return True
-
-    return False
-
-
 def find_request(original_args: list) -> Request:
     for arg in original_args:
         if isinstance(arg, Request):
@@ -87,25 +76,13 @@ def find_request(original_args: list) -> Request:
     raise Exception("Could not find request in args:" + str(original_args))
 
 
-def find_view_set(original_args: list) -> Request:
-    for arg in original_args:
-        if issubclass(type(arg), APIView):
-            return arg
-    raise Exception("Could not find view set in args:" + str(original_args))
-
-
-def build_explicit_view_param(
-    param: inspect.Parameter,
-    request: Request,
-    settings: ParamSettings,
-    original_kwargs: dict,
+def build_explicit_param(
+    param: inspect.Parameter, request: Request, settings: ParamSettings, path_args: dict
 ):
-    default_value = get_default_value(param)
-
     if settings.param_type == "path":
-        return PathParam(
-            param, request, settings=settings, raw_value=original_kwargs.get(param.name)
-        )
+        key = settings.source or param.name
+        raw_value = path_args.get(key, empty)
+        return PathParam(param, request, settings=settings, raw_value=raw_value)
     elif settings.param_type == "body":
         return BodyParam(param, request, settings=settings)
     elif settings.param_type == "current_user":
@@ -114,27 +91,20 @@ def build_explicit_view_param(
         return QueryParam(param, request, settings=settings)
 
 
-def get_view_param(
-    param: inspect.Parameter,
-    request: Request,
-    original_args: list,
-    original_kwargs: dict,
-):
+def get_view_param(param: inspect.Parameter, request: Request, path_args: dict):
     explicit_settings = get_explicit_param_settings(param)
     default = get_default_value(param)
 
     if explicit_settings:
-        return build_explicit_view_param(
-            param, request, explicit_settings, original_kwargs
-        )
+        return build_explicit_param(param, request, explicit_settings, path_args)
     elif is_explicit_request_param(param):
         return PassThruParam(request)
-    elif param.name in original_kwargs:
+    elif param.name in path_args:
         return PathParam(
             param,
             request,
             settings=ParamSettings(param_type="path", default=default),
-            raw_value=original_kwargs.get(param.name),
+            raw_value=path_args.get(param.name),
         )
     elif is_implicit_body_param(param):
         return BodyParam(
@@ -142,8 +112,6 @@ def get_view_param(
         )
     elif is_implicit_request_param(param):
         return PassThruParam(request)
-    elif is_implicit_view_set_param(param, original_args):
-        return PassThruParam(find_view_set(original_args))
     else:
         return QueryParam(
             param,
@@ -152,13 +120,14 @@ def get_view_param(
         )
 
 
-def transform_view_params(typed_func, original_args: list, original_kwargs: dict):
+def transform_view_params(
+    typed_params: List[inspect.Parameter], request: Request, path_args: dict
+):
     validated_params = []
     errors: Dict[str, Any] = {}
-    request = find_request(original_args)
 
-    for name, param in inspect.signature(typed_func).parameters.items():
-        p = get_view_param(param, request, original_args, original_kwargs)
+    for param in typed_params:
+        p = get_view_param(param, request, path_args)
         value, error = p.validate_or_error()
 
         if error:
@@ -172,13 +141,23 @@ def transform_view_params(typed_func, original_args: list, original_kwargs: dict
     return validated_params
 
 
-def prevalidate(view_func):
+def prevalidate(view_func, for_method: bool = False):
     arg_info = inspect.getfullargspec(view_func)
 
     if arg_info.varargs is not None or arg_info.varkw is not None:
         raise Exception(
             f"{view_func.__name__}: variable-length argument lists and dictionaries cannot be used with typed views"
         )
+
+    if for_method:
+        error_msg = "For typed methods, 'self' must be passed as the first arg with no annotation"
+
+        if (
+            len(arg_info.args) < 1
+            or arg_info.args[0] != "self"
+            or "self" in arg_info.annotations
+        ):
+            raise Exception(error_msg)
 
 
 def typed_api_view(methods):
@@ -187,7 +166,11 @@ def typed_api_view(methods):
 
         @api_view(methods)
         def wrapper(*original_args, **original_kwargs):
-            transformed = transform_view_params(view, original_args, original_kwargs)
+            original_args = list(original_args)
+            request = find_request(original_args)
+            transformed = transform_view_params(
+                inspect.signature(view).parameters.values(), request, original_kwargs
+            )
             return view(*transformed)
 
         return wrapper
@@ -197,24 +180,40 @@ def typed_api_view(methods):
 
 def typed_action(**action_kwargs):
     def wrap_validate_and_render(view):
-        prevalidate(view)
+        prevalidate(view, for_method=True)
 
         @action(**action_kwargs)
         @wraps(view)
         def wrapper(*original_args, **original_kwargs):
-            transformed = transform_view_params(view, original_args, original_kwargs)
-            return view(*transformed)
+            original_args = list(original_args)
+            request = find_request(original_args)
+            _self = original_args.pop(0)
+
+            typed_params = [
+                p for n, p in inspect.signature(view).parameters.items() if n != "self"
+            ]
+
+            transformed = transform_view_params(typed_params, request, original_kwargs)
+            return view(_self, *transformed)
 
         return wrapper
 
     return wrap_validate_and_render
 
 
-def typed_view(view):
-    prevalidate(view)
+def typed_method(view):
+    prevalidate(view, for_method=True)
 
     def wrap_validate_and_render(*original_args, **original_kwargs):
-        transformed = transform_view_params(view, original_args, original_kwargs)
-        return view(*transformed)
+        original_args = list(original_args)
+        request = find_request(original_args)
+        _self = original_args.pop(0)
+
+        typed_params = [
+            p for n, p in inspect.signature(view).parameters.items() if n != "self"
+        ]
+
+        transformed = transform_view_params(typed_params, request, original_kwargs)
+        return view(_self, *transformed)
 
     return wrap_validate_and_render
