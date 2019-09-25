@@ -1,8 +1,6 @@
 from typing import Any, List, Optional
 
-from pytz import timezone
-
-from typed_views import empty
+from rest_framework.fields import empty
 
 
 class ParamSettings(object):

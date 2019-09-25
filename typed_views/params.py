@@ -1,10 +1,10 @@
 import inspect
-from typing import Any, List, Tuple
+from typing import Any, Tuple
 
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import Field
+from rest_framework.fields import Field, empty
+from rest_framework.request import Request
 
-from typed_views import Request, empty
 from typed_views.param_settings import ParamSettings
 from typed_views.utils import get_nested_value, parse_list_annotation
 from typed_views.validators import ValidatorFactory

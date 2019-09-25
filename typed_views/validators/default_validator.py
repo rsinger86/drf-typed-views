@@ -1,8 +1,7 @@
 from typing import Any
 
 from rest_framework.exceptions import ValidationError
-
-from typed_views import empty
+from rest_framework.fields import empty
 
 
 class DefaultValidator(object):
