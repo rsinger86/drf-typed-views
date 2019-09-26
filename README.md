@@ -204,3 +204,9 @@ The following native Python types are supported. Depending on the type, you can 
 ### List
 
 ### Enum
+
+### typesystem.Schema
+
+### pydantic.BaseModel
+
+### marshmallow.Schema
