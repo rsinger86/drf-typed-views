@@ -115,6 +115,10 @@ def create_booking(city: str, booking: BookingSchema):
 
 In this example, `city` will again be populated using the URL path variable. The `booking` parameter is annotated using a supported complex schema class (Pydantic), so it's assumed to come from the request body, which will be read in as JSON, used to hydrate the Pydantic `BookingSchema` and then validated. If validation fails a `ValidationError` will be raised.
 
+### Combining Different Parameter Types
+
+Todo...
+
 ## How It Works: Advanced Usage
 
 For more advanced use cases, you can explicitly declare how each parameter's value is sourced from the request -- from the query parameters, path, body or headers -- as well as define additional validation rules.
@@ -129,7 +133,11 @@ def list_documents(year: date = Path(), title: str = Query(default=None)):
     # ORM logic here...
 ```
 
-In this example, `year` is required and must come from the URL path and `title` is an optional query parameter because the `default` is set. This is similar to Django REST's (serializer fields)[https://www.django-rest-framework.org/api-guide/fields/#core-arguments]:  passing a default implies that the filed is not required. 
+In this example, `year` is required and must come from the URL path and `title` is an optional query parameter because the `default` is set. This is similar to Django REST's [serializer fields](https://www.django-rest-framework.org/api-guide/fields/#core-arguments):  passing a default implies that the filed is not required. 
+
+### Additional Validation Rules
+
+Todo...
 
 ### Nested Body Fields
 
@@ -165,3 +173,34 @@ You can also use dot-notation to source data multiple levels deep in the JSON pa
 
 ### List Validation
 
+
+
+### Accessing the Request Object
+
+
+
+## Supported Types and Validator Rules
+
+The following native Python types are supported. Depending on the type, you can pass additional validation rules to the request element class (`Query`, `Path`, `Body`). You can think of the type combining with the validation rules to create a Django REST serializer field on the fly (in fact, that's what happens behind the scenes).
+
+### int
+
+### float
+
+### Decimal
+
+### str
+
+### bool
+
+### datetime
+
+### date
+
+### time
+
+### timedelta
+
+### List
+
+### Enum
