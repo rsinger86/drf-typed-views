@@ -113,6 +113,55 @@ def create_booking(city: str, booking: BookingSchema):
     # do something with the validated booking...
 ```
 
-In this example, `city` will again be populated using the URL path variable. The `booking` parameter is annotated using a supported complex schema class (Pydantic), so it's assumed to come from the request body, which will be read in as JSON, used to hydrate the Pydantic `BookingSchema` and then validated: if validation fails a `ValidationError` will be raised.
+In this example, `city` will again be populated using the URL path variable. The `booking` parameter is annotated using a supported complex schema class (Pydantic), so it's assumed to come from the request body, which will be read in as JSON, used to hydrate the Pydantic `BookingSchema` and then validated. If validation fails a `ValidationError` will be raised.
 
 ## How It Works: Advanced Usage
+
+For more advanced use cases, you can explicitly declare how each parameter's value is sourced from the request -- from the query parameters, path, body or headers -- as well as define additional validation rules.
+
+You import a class named after the request element that is expected to hold the value and assign it to the parameter's default.
+
+```python
+from typed_views import typed_api_view, Query, Path
+
+@typed_api_view(["GET"])
+def list_documents(year: date = Path(), title: str = Query(default=None)):
+    # ORM logic here...
+```
+
+In this example, `year` is required and must come from the URL path and `title` is an optional query parameter because the `default` is set. This is similar to Django REST's (serializer fields)[https://www.django-rest-framework.org/api-guide/fields/#core-arguments]:  passing a default implies that the filed is not required. 
+
+### Nested Body Fields
+
+Similar to how `source` is used in Django REST to control field mappings during serialization, you can use it to specify the exact path to the request data.
+
+```python
+from pydantic import BaseModel
+from typed_views import typed_api_view, Query, Path
+
+class Document(BaseModel):
+    title: str
+    body: str
+
+
+@typed_api_view(["POST"])
+def create_document(
+    strict_mode: bool = Body(source="strict"), 
+    item: Document = Body(source="data")
+):
+    # ORM logic here...
+```
+This function will expect a body like:
+```json
+{
+    "strict": false,
+    "data": {
+        "title": "A Dark and Stormy Night",
+        "body": "Once upon a time"
+    }
+}
+```
+You can also use dot-notation to source data multiple levels deep in the JSON payload.
+
+### List Validation
+
