@@ -126,4 +126,3 @@ class ParamSettings(object):
             raise Exception(
                 "'param_type' must be one of: body, query_param, path, current_user, header"
             )
-

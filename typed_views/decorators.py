@@ -143,21 +143,3 @@ def typed_action(**action_kwargs):
         return wrapper
 
     return wrap_validate_and_render
-
-
-def typed_method(view):
-    prevalidate(view, for_method=True)
-
-    def wrap_validate_and_render(*original_args, **original_kwargs):
-        original_args = list(original_args)
-        request = find_request(original_args)
-        _self = original_args.pop(0)
-
-        typed_params = [
-            p for n, p in inspect.signature(view).parameters.items() if n != "self"
-        ]
-
-        transformed = transform_view_params(typed_params, request, original_kwargs)
-        return view(_self, *transformed)
-
-    return wrap_validate_and_render

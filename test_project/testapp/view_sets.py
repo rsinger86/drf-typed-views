@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from test_project.testapp.models import Movie
 from test_project.testapp.serializers import MovieSerializer
-from typed_views import typed_action, typed_method
+from typed_views import typed_action
 
 
 class MovieViewSet(viewsets.ModelViewSet):
@@ -14,17 +14,9 @@ class MovieViewSet(viewsets.ModelViewSet):
         return Movie.objects.all()
 
     @typed_action(detail=True, methods=["get"])
-    def reviews(self, request, pk: int, title: int):
+    def reviews(self, request, pk: int, title: str = None):
         return Response({"hello": "world"})
 
     @action(detail=True, methods=["get"])
     def actors(self, request, pk: int):
-        return Response({"hello": "world"})
-
-    @typed_method
-    def list(self, request):
-        return Response({"hello": "world"})
-
-    @typed_method
-    def retrieve(self, pk: int, title: str):
         return Response({"hello": "world"})

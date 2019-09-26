@@ -1,15 +1,11 @@
-import functools
-import inspect
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Dict, List, Mapping, Tuple
+from typing import List
 
 import typesystem
-from django.contrib.auth.models import User
-from django.shortcuts import render
 from pydantic import BaseModel
-from rest_framework import viewsets
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from typed_views import Body, CurrentUser, Param, Path, Query, typed_api_view
