@@ -43,7 +43,7 @@ GET `/users/troll/?registered_after=9999&logins__gte=hugge&groups=1&is_staff=may
         "is_staff": "'maybe' is not a valid boolean"
     }
 ```
-
+## Table of Contents
 * [How It Works: Simple Usage](#how-it-works-simple-usage)
   * [Basic GET Request](#basic-get-request)
   * [Basic POST Request](#basic-post-request)
