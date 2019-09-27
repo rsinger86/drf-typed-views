@@ -1,6 +1,6 @@
 ## Django REST Framework - Typed Views
 
-This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for code that is easier to read and write: inputs for views are individually declared, not buried inside all-encompassing `request` objects, and require less repetitive validation/sanitization code.
+This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for code that is easier to read and write: view inputs are individually declared, not buried inside all-encompassing `request` objects. You can also write less validation/sanitization code. 
 
 More features:
 - [Pydantic](https://pydantic-docs.helpmanual.io/) models and [TypeSystem](https://www.encode.io/typesystem/) schemas are compatible types for view parameters. Annotate your POST/PUT functions with them to automatically validate incoming request bodies and hydrate models.
@@ -27,7 +27,7 @@ def get_users(
 ```
 
 GET `/users/registered/?registered_after=2019-03-03&logins__gte=3&groups=admin,manager&is_staff=yes`<br>
-:ok: Status Code: 200
+Status Code: 200
 ```
     'registered'  date(2019, 3, 03)   3  ['admin', 'manager']  True
 ```
@@ -222,14 +222,17 @@ Todo...
 The following native Python types are supported. Depending on the type, you can pass additional validation rules to the request element class (`Query`, `Path`, `Body`). You can think of the type combining with the validation rules to create a Django REST serializer field on the fly -- in fact, that's what happens behind the scenes.
 
 ### int
+Additional arguments:
 - `max_value` Validate that the number provided is no greater than this value.
 - `min_value` Validate that the number provided is no less than this value.
 
 ### float
+Additional arguments:
 - `max_value` Validate that the number provided is no greater than this value.
 - `min_value` Validate that the number provided is no less than this value.
 
 ### Decimal
+Additional arguments:
 - `max_value` Validate that the number provided is no greater than this value.
 - `min_value` Validate that the number provided is no less than this value.
 - .. even more ... accepts the same arguments as [Django REST's `DecimalField`](https://www.django-rest-framework.org/api-guide/fields/#decimalfield)
