@@ -44,6 +44,35 @@ GET `/users/troll/?registered_after=9999&logins__gte=hugge&groups=1&is_staff=may
     }
 ```
 
+* [How It Works: Simple Usage](#how-it-works-simple-usage)
+  * [Basic GET Request](#basic-get-request)
+  * [Basic POST Request](#basic-post-request)
+  * [Combining Different Parameter Types](##combining-different-parameter-types)
+* [How It Works: Advanced Usage](#how-it-works-advanced-usage)
+  * [Additional Validation Rules](#additional-validation-rules)
+  * [Nested Body Fields](#nested-body-fields)
+  * [List Validation](#list-validation)
+  * [Accessing the Request Object](#accessing-the-request-object)
+* [Request Element Classes](#request-element-classes)
+  * [Query](#query)
+  * [Body](#body)
+  * [Path](#path)
+* [Supported Types and Validator Rules](#supported-types-and-validator-rules)
+  * [int](#int)
+  * [float](#float)
+  * [Decimal](#decimal)
+  * [str](#str)
+  * [bool](#bool)
+  * [datetime](#datetime)
+  * [date](#date)
+  * [time](#time)
+  * [timedelta](#timedelta)
+  * [List](#list)
+  * [Enum](#enum)
+  * [typesystem.Schema](#typesystemschema)
+  * [pydantic.BaseModel](#pydanticbasemodel)
+  * [marshmallow.Schema](#marshmallowschema)
+
 ## Inspiration
 
 I first came across type annotations for validation in [API Star](https://github.com/encode/apistar), which has since evolved into an OpenAPI toolkit. This pattern was also offered by [Hug](https://hugapi.github.io/hug/) and [Molten](https://github.com/Bogdanp/molten) (I believe in that order). Furthermore, I've borrowed ideas from [FastAPI](https://github.com/tiangolo/fastapi), specifically its use of default values to declare additional validation rules. Finally, this [blog post](https://instagram-engineering.com/types-for-python-http-apis-an-instagram-story-d3c3a207fdb7) from Instagram's engineering team showed me how decorators can be used to implement these features on view functions.
