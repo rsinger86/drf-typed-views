@@ -178,16 +178,61 @@ You can also use dot-notation to source data multiple levels deep in the JSON pa
 ### Accessing the Request Object
 
 
+## Request Element Classes
+
+You can specify the part of the request that holds each view parameter by using default function arguments, for example:
+```python
+    from typed_views import Body, Query
+
+    @typed_api_view(["PUT"])
+    def update_user(
+        user: UserSchema = Body(), 
+        optimistic_update: bool = Query(default=False)
+    ):
+```
+
+The `user` parameter will come from the request body and is required because no default is provided. Meanwhile, `optimistic_update` is not required and will be populated from a query parameter with the same name. 
+
+The core arguments to these classes are:
+- `default` (the default value for the parameter, which is required unless set)
+- `source` (if the view parameter has a different name than the value embedded in the request)
+
+### Query
+Use the `source` argument to alias the parameter value. For example, your query parameters can have dashes (`?starting-after=2019-09-09`) can be mapped to a parameter named `starting_after`. Also see this example for how to use `*` for `source` to map all the query parameters to a `dict` that populates a complex schema.
+
+### Path
+Use the `source` argument to alias a view parameter name.
+
+### Body
+By default, the entire request body is used to populate parameters marked with this class (`source="*"`). However, you can use specify nested fields in the request body, with support for dot notation.
+
+```python
+    def create_user(
+        first_name: str = Body(source="first_name"),
+        last_name: str = Body(source="last_name"),
+        phone: str = Body(source="contact.phone_number")
+    )
+```
+
+### CurrentUser
+Todo...
 
 ## Supported Types and Validator Rules
 
-The following native Python types are supported. Depending on the type, you can pass additional validation rules to the request element class (`Query`, `Path`, `Body`). You can think of the type combining with the validation rules to create a Django REST serializer field on the fly (in fact, that's what happens behind the scenes).
+The following native Python types are supported. Depending on the type, you can pass additional validation rules to the request element class (`Query`, `Path`, `Body`). You can think of the type combining with the validation rules to create a Django REST serializer field on the fly -- in fact, that's what happens behind the scenes.
 
 ### int
+- `max_value` Validate that the number provided is no greater than this value.
+- `min_value` Validate that the number provided is no less than this value.
 
 ### float
+- `max_value` Validate that the number provided is no greater than this value.
+- `min_value` Validate that the number provided is no less than this value.
 
 ### Decimal
+- `max_value` Validate that the number provided is no greater than this value.
+- `min_value` Validate that the number provided is no less than this value.
+- .. even more ... accepts the same arguments as [Django REST's `DecimalField`](https://www.django-rest-framework.org/api-guide/fields/#decimalfield)
 
 ### str
 
