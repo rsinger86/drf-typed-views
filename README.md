@@ -4,41 +4,36 @@ This project extends [Django Rest Framework](https://www.django-rest-framework.o
 
 More features:
 - [Pydantic](https://pydantic-docs.helpmanual.io/) models and [TypeSystem](https://www.encode.io/typesystem/) schemas are compatible types for view parameters. Annotate your POST/PUT functions with them to automatically validate incoming request bodies and hydrate models.
-- Advanced validators for more than just the type:
-  - apply `min_value`/`max_value` rules to incoming numbers
-  - validate string formats like `email`, `uuid` and `ipv4/6`
-  - use Python's native `Enum` type for `choices` validation
+- Advanced validators for more than just the type: `min_value`/`max_value` for numbers
+- Validate string formats: `email`, `uuid` and `ipv4/6`; use Python's native `Enum` for `choices` validation
 
 Quick example:
 ```python
+from typed_views import typed_api_view
+
 class UserType(Enum):
     trial = "trial"
     registered = "registered"
 
 @typed_api_view(["GET"])
 def get_users(
-    type: UserType,
-    registered_after: date = None, 
-    login_count__gte: int = None,
-    groups: List[str] = None,
-    is_staff: bool = None
+    type: UserType, registered_after: date = None, groups: List[str] = None, is_staff: bool = None
 ):
     print(type, registered_after, login_count__gte, groups, is_staff)
 ```
 
-GET `/users/registered/?registered_after=2019-03-03&logins__gte=3&groups=admin,manager&is_staff=yes`<br>
+GET `/users/registered/?registered_after=2019-03-03&groups=admin,manager&is_staff=yes`<br>
 Status Code: 200
 ```
-    'registered'  date(2019, 3, 03)   3  ['admin', 'manager']  True
+    'registered'  date(2019, 3, 03)   ['admin', 'manager']  True
 ```
 
-GET `/users/troll/?registered_after=9999&logins__gte=hugge&groups=1&is_staff=maybe`<br>
+GET `/users/troll/?registered_after=9999&groups=1&is_staff=maybe`<br>
 :no_entry_sign: Status Code: 400 *ValidationError raised* 
 ```json
     {
         "type": "`troll` is not a valid for UserType",
         "registered_after": "'9999' is not a valid date",
-        "logins__gte": "'hugge' is not a valid integer",
         "groups": "1 is not a valid string",
         "is_staff": "'maybe' is not a valid boolean"
     }
@@ -72,14 +67,7 @@ GET `/users/troll/?registered_after=9999&logins__gte=hugge&groups=1&is_staff=may
   * [typesystem.Schema](#typesystemschema)
   * [pydantic.BaseModel](#pydanticbasemodel)
   * [marshmallow.Schema](#marshmallowschema)
-
-## Inspiration
-
-I first came across type annotations for validation in [API Star](https://github.com/encode/apistar), which has since evolved into an OpenAPI toolkit. This pattern was also offered by [Hug](https://hugapi.github.io/hug/) and [Molten](https://github.com/Bogdanp/molten) (I believe in that order). Furthermore, I've borrowed ideas from [FastAPI](https://github.com/tiangolo/fastapi), specifically its use of default values to declare additional validation rules. Finally, this [blog post](https://instagram-engineering.com/types-for-python-http-apis-an-instagram-story-d3c3a207fdb7) from Instagram's engineering team showed me how decorators can be used to implement these features on view functions.
-
-## Motivation
-
-While REST Framework's ModelViewSets and ModelSerializers are very productive when building out CRUD resources, I've felt less productive in the framework when developing other types of operations. Serializers are a powerful and flexible way to validate incoming request data, but are not as self-documenting as type annotations. Furthermore, the Django ecosystem is hugely productive and I see no reason why REST Framework cannot take advantage of more Python 3 features.
+* [Motivation & Inspiration](#motivationinspiration)
 
 ## How It Works: Simple Usage
 
@@ -97,6 +85,9 @@ Unless a default value is given, the parameter is **required** and a `Validation
 urlpatterns = [
     url(r"^(?P<city>[\w+])/restaurants/", search_restaurants)
 ]
+
+from typed_views import typed_api_view
+
 
 # Example request: /chicago/restaurnts?delivery=yes
 @typed_api_view(["GET"])
@@ -287,3 +278,12 @@ Additional arguments:
 ### pydantic.BaseModel
 
 ### marshmallow.Schema
+
+## Motivation
+
+While REST Framework's ModelViewSets and ModelSerializers are very productive when building out CRUD resources, I've felt less productive in the framework when developing other types of operations. Serializers are a powerful and flexible way to validate incoming request data, but are not as self-documenting as type annotations. Furthermore, the Django ecosystem is hugely productive and I see no reason why REST Framework cannot take advantage of more Python 3 features.
+
+## Inspiration
+
+I first came across type annotations for validation in [API Star](https://github.com/encode/apistar), which has since evolved into an OpenAPI toolkit. This pattern was also offered by [Hug](https://hugapi.github.io/hug/) and [Molten](https://github.com/Bogdanp/molten) (I believe in that order). Furthermore, I've borrowed ideas from [FastAPI](https://github.com/tiangolo/fastapi), specifically its use of default values to declare additional validation rules. Finally, this [blog post](https://instagram-engineering.com/types-for-python-http-apis-an-instagram-story-d3c3a207fdb7) from Instagram's engineering team showed me how decorators can be used to implement these features on view functions.
+
