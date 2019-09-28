@@ -369,11 +369,33 @@ Additional arguments:
     - `ipv6` validates input is a valid IPv6 string
     - `file_path` validates that the input corresponds to filenames in a certain directory on the filesystem; allows all the same keyword arguments as Django REST's [`FilePathField`](https://www.django-rest-framework.org/api-guide/fields/#filepathfield)
 
+Some examples:
+
+```python
+from typed_views import typed_api_view, Query
+
+@typed_api_view(["GET"])
+def search_users(email: str = Query(format='email')):
+    # ORM logic here...
+    return Response(data)
+
+@typed_api_view(["GET"])
+def search_shared_links(url: str = Query(default=None, format='url')):
+    # ORM logic here...
+    return Response(data)
+
+@typed_api_view(["GET"])
+def search_request_logs(ip_address: str = Query(default=None, format='ip')):
+    # ORM logic here...
+    return Response(data)
+```
+
 ### int
 Additional arguments:
 - `max_value` Validate that the number provided is no greater than this value.
 - `min_value` Validate that the number provided is no less than this value.
 
+An example:
 ```python
 from typed_views import typed_api_view, Query
 
@@ -387,6 +409,7 @@ Additional arguments:
 - `max_value` Validate that the number provided is no greater than this value.
 - `min_value` Validate that the number provided is no less than this value.
 
+An example:
 ```python
 from typed_views import typed_api_view, Query
 
@@ -436,6 +459,7 @@ Additional arguments:
 - `max_length` Validates that the list contains no more than this number of elements.
 - `child` Pass keyword constraints via a `Param` instance to to validate the members of the list.
 
+An example:
 ```python
 from typed_views import typed_api_view, Param, Query
 
@@ -447,6 +471,7 @@ def search_contacts(emails: List[str] = Query(max_length=10, child=Param(format=
 ### Enum
 Validates that the value of the input is one of a limited set of choices. Think of this as mapping to a Django REST [`ChoiceField`](https://www.django-rest-framework.org/api-guide/fields/#choicefield).
 
+An example:
 ```python
 from typed_views import typed_api_view, Query
 
