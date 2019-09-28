@@ -289,7 +289,19 @@ In this example, `Query(source="*")` is instructing an instance of `SearchParams
 
 ### (Simple) Access Control
 
-ToDo...
+You can apply some very basic access control by applying some validation rules to a view parameter sourced from the `CurrentUser` request element class. In the example below, a `ValidationError` will be raised if the `request.user` is not a member of either `super_users` or `admins`.
+
+```python
+    from my_pydantic_schemas import BookingSchema
+    from typed_views import typed_api_view, CurrentUser
+
+    @typed_api_view(["POST"])
+    def create_booking(
+        booking: BookingSchema, 
+        user: User = CurrentUser(member_of_any=["super_users", "admins"])
+    ):
+        # Do something with the request.user
+```
 
 ## Request Element Classes
 
@@ -377,7 +389,20 @@ Use the `source` argument to alias a view parameter name. More commonly, though,
 
 ### CurrentUser
 
-Todo...
+Use this class to have a view parameter populated with the current user of the request. You can even extract fields from the current user using the `source` option.
+
+```python
+    from my_pydantic_schemas import BookingSchema
+    from typed_views import typed_api_view, CurrentUser
+
+    @typed_api_view(["POST"])
+    def create_booking(booking: BookingSchema, user: User = CurrentUser()):
+        # Do something with the request.user
+
+    @typed_api_view(["GET"])
+    def retrieve_something(first_name: str = CurrentUser(source="first_name")):
+        # Do something with the request.user's first name
+```
 
 ## Supported Types and Validator Rules
 
@@ -569,6 +594,25 @@ def create_user(user: User):
     # now have a user instance (assuming ValidationError wasn't raised)
 ```
 
+### CurrentUser
+View parameters that are explicitly sourced from the `CurrentUser` request element class can take some additional keyword arguments, which can implement a very basic form of access control.
+
+Additional arguments:
+- `member_of` (str) Validates that the current `request.user` is a member of a group with this name
+- `member_of_any` (List[str]) Validates that the current `request.user` is a member of one of these groups
+
+*Using these keyword validators assumes that your `User` model has a many-to-many relationship with `django.contrib.auth.models.Group` via `user.groups`.*
+
+An example:
+
+```python
+from django.contrib.auth.models import User
+from typed_views import typed_api_view, CurrentUser
+
+@typed_api_view(["GET"])
+def do_something(user: User = CurrentUser(member_of_any=["admin"])):
+    # now have a user instance (assuming ValidationError wasn't raised)
+```
 ## Motivation
 
 While REST Framework's ModelViewSets and ModelSerializers are very productive when building out CRUD resources, I've felt less productive in the framework when developing other types of operations. Serializers are a powerful and flexible way to validate incoming request data, but are not as self-documenting as type annotations. Furthermore, the Django ecosystem is hugely productive and I see no reason why REST Framework cannot take advantage of more Python 3 features.

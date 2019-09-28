@@ -1,4 +1,3 @@
-from pydantic import ValidationError as PydanticValidationError
 from rest_framework.exceptions import ValidationError
 
 

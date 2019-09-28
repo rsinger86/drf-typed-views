@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "rest_framework",
     "test_project.testapp",
+    "rest_framework.authtoken",
 ]
 
 
@@ -105,4 +106,10 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR + "/static/"
 
-REST_FRAMEWORK = {"PAGE_SIZE": 100, "URL_FIELD_NAME": "self_link"}
+REST_FRAMEWORK = {
+    "PAGE_SIZE": 100,
+    "URL_FIELD_NAME": "self_link",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication"
+    ],
+}

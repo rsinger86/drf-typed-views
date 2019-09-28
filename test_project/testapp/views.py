@@ -3,11 +3,11 @@ from decimal import Decimal
 from enum import Enum
 from typing import List
 
+from django.contrib.auth.models import User
 import typesystem
 from pydantic import BaseModel
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
+import marshmallow
 from typed_views import Body, CurrentUser, Param, Path, Query, typed_api_view
 
 
@@ -53,20 +53,30 @@ def create_booking(booking: Booking = Body(source="_data.item")):
     return Response(dict(booking))
 
 
+class BandMemberSchema(marshmallow.Schema):
+    name = marshmallow.fields.String(required=True)
+    email = marshmallow.fields.Email()
+
+
+@typed_api_view(["POST"])
+def create_band_member(band_member: BandMemberSchema):
+    return Response(dict(band_member))
+
+
 @typed_api_view(["GET"])
 def get_logs(
     idddd: int = Path(source="id"),
     latitude: Decimal = Query(decimal_places=20),
     title: str = Query(min_length=6),
     price: float = Query(min_value=6),
-    # = user: User = CurrentUser(),
+    user: User = CurrentUser(member_of_any=[]),
     is_pretty: bool = Query(),
     email: str = Query(format="email"),
     upper_alpha_string: str = Query(regex=r"^[A-Z]+$"),
     identifier: str = Query(format="slug"),
     website: str = Query(format="url"),
     identity: str = Query(format="uuid"),
-    file: str = Query(format="file_path", path="/tmp/"),
+    # file: str = Query(format="file_path", path="/tmp/"),
     ip: str = Query(format="ipv4"),
     timestamp: datetime = Query(),
     start_date: date = Query(),
@@ -75,6 +85,7 @@ def get_logs(
     bag_type: BagOptions = Query(source="bag"),
     numbers: List[int] = Query(child=Param(min_value=0)),
 ):
+
     return Response(
         {
             "idddd": idddd,
@@ -87,7 +98,7 @@ def get_logs(
             "identifier": identifier,
             "website": website,
             "identity": identity,
-            "file": file,
+            # "file": file,
             "ip": ip,
             "timestamp": timestamp,
             "start_date": start_date,

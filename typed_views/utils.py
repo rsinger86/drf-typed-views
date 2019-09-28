@@ -8,7 +8,7 @@ from pydantic import BaseModel as PydanticBaseModel
 from rest_framework.fields import empty
 from rest_framework.request import Request
 from typesystem import Schema as TypeSystemSchema
-
+from marshmallow import Schema as MarshmallowSchema
 from .param_settings import ParamSettings
 
 
@@ -29,6 +29,8 @@ def parse_complex_type(annotation) -> Tuple[bool, Optional[str]]:
         return True, "pydantic"
     if inspect.isclass(annotation) and issubclass(annotation, TypeSystemSchema):
         return True, "typesystem"
+    if inspect.isclass(annotation) and issubclass(annotation, MarshmallowSchema):
+        return True, "marshmallow"
     return False, None
 
 

@@ -31,6 +31,8 @@ class ParamSettings(object):
     allow_folders: bool
     protocol: str
     child: Optional["ParamSettings"]
+    member_of: Optional[str]
+    member_of_any: List[str]
 
     def __init__(
         self,
@@ -65,6 +67,9 @@ class ParamSettings(object):
         protocol: str = "both",
         # ListField arg
         child: "ParamSettings" = None,
+        # Current user validator arg
+        member_of: str = None,
+        member_of_any: List[str] = [],
     ):
         self.param_type = param_type
         self.default = default
@@ -93,6 +98,8 @@ class ParamSettings(object):
         self.allow_folders = allow_folders
         self.protocol = protocol
         self.child = child
+        self.member_of = member_of
+        self.member_of_any = member_of_any
 
         if self.regex and self.format:
             raise Exception("Cannot set both 'regex' and 'format'")

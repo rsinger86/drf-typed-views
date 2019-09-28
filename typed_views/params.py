@@ -7,7 +7,7 @@ from rest_framework.request import Request
 
 from typed_views.param_settings import ParamSettings
 from typed_views.utils import get_nested_value, parse_list_annotation
-from typed_views.validators import ValidatorFactory
+from typed_views.validators import CurrentUserValidator, ValidatorFactory
 
 
 class Param(object):
@@ -89,4 +89,26 @@ class CurrentUserParam(Param):
     def _get_raw_value(self):
         if self.settings.source in ("*", None):
             return self.request.user
-        return get_nested_value(self.request.data, self.settings.source)
+
+        obj = self.request.user
+
+        for path in self.settings.source.split("."):
+            if hasattr(obj, path):
+                obj = getattr(obj, path)
+            else:
+                obj = None
+                break
+
+        return obj
+
+    def validate_or_error(self) -> Tuple[Any, Any]:
+        value = self._get_raw_value()
+        generic_validator = self._get_validator()
+        current_user_validator = CurrentUserValidator(self.settings)
+
+        try:
+            value = generic_validator.run_validation(value)
+            current_user_validator.run_validation(self.request.user)
+            return value, None
+        except ValidationError as e:
+            return None, {self._source: e.detail}

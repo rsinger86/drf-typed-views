@@ -1,7 +1,6 @@
-import inspect
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from typing import Any, List
+from typing import Any
 
 from rest_framework import serializers
 
@@ -15,6 +14,7 @@ from typed_views.validators import (
     DefaultValidator,
     PydanticValidator,
     TypeSystemValidator,
+    MarshMallowValidator,
 )
 
 
@@ -161,5 +161,8 @@ class ValidatorFactory(object):
 
         if is_complex_type and package == "typesystem":
             return TypeSystemValidator(annotation)
+
+        if is_complex_type and package == "marshmallow":
+            return MarshMallowValidator(annotation)
 
         return DefaultValidator(default=settings.default)
