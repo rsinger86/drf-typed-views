@@ -3,7 +3,7 @@
 This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for code that is easier to read and write. View inputs are individually declared, not buried inside all-encompassing `request` objects. Meanwhile, you get even more out of type annotations: they can replace repetitive validation/sanitization code. 
 
 More features:
-- [Pydantic](https://pydantic-docs.helpmanual.io/) models and [TypeSystem](https://www.encode.io/typesystem/) schemas are compatible types for view parameters. Annotate your POST/PUT functions with them to automatically validate incoming request bodies.
+- [Pydantic](https://pydantic-docs.helpmanual.io/) models and [Marshmallow](https://marshmallow.readthedocs.io) schemas are compatible types for view parameters. Annotate your POST/PUT functions with them to automatically validate incoming request bodies.
 - Advanced validators for more than just the type: `min_value`/`max_value` for numbers
 - Validate string formats: `email`, `uuid` and `ipv4/6`; use Python's native `Enum` for "choices" validation
 
@@ -261,6 +261,29 @@ from typed_views import typed_api_view
 def search_documens(request: Request, q: str = None):
     # ORM logic ...
 ```
+
+### Interdependent Query Parameter Validation
+Oftentimes, it's useful to validate a combination of query parameters - for instance, a `start_date` shouldn't come after an `end_date`. You can populate a complex schema object (Pydantic or Marshmallow) with a dictionary of query parameters from the `request` object.
+
+```python
+from marshmallow import Schema, fields, validates_schema, ValidationError
+from typed_views import 
+
+class SearchParamsSchema(Schema):
+    start_date = fields.Date()
+    end_date = fields.Date()
+
+    @validates_schema
+    def validate_numbers(self, data, **kwargs):
+        if data["start_date"] >= data["end_date"]:
+            raise ValidationError("end_date must come after start_date")
+
+@typed_api_view(["GET"])
+def search_documens(search_params: SearchParamsSchema = Query(source="*")):
+    # ORM logic ...
+```
+
+In this example, `Query(source="*")` is instructing an instance of `SearchParamsSchema` to be populated using all of the query parameters together: `request.query_params.dict()`.  
 
 ## Request Element Classes
 
