@@ -17,24 +17,24 @@ class UserType(Enum):
 
 @typed_api_view(["GET"])
 def get_users(
-    type: UserType, registered_on: date = None, groups: List[str] = [], is_staff: bool = None
+    type: UserType, registered_on: date = None, groups: List[int] = [], is_staff: bool = None
 ):
     print(type, registered_on, login_count__gte, groups, is_staff)
 ```
 
-GET `/users/registered/?registered_on=2019-03-03&groups=admin,manager&is_staff=yes`<br>
+GET `/users/registered/?registered_on=2019-03-03&groups=4,5&is_staff=yes`<br>
 Status Code: 200
 ```
-    'registered'  date(2019, 3, 3)   ['admin', 'manager']  True
+    'registered'  date(2019, 3, 3)   [4, 5]  True
 ```
 
-GET `/users/troll/?registered_on=9999&groups=1&is_staff=maybe`<br>
+GET `/users/troll/?registered_on=9999&groups=admin&is_staff=maybe`<br>
 :no_entry_sign: Status Code: 400 *ValidationError raised* 
 ```json
     {
         "type": "`troll` is not a valid for UserType",
         "registered_on": "'9999' is not a valid date",
-        "groups": "1 is not a valid string",
+        "groups": "'admin' is not a valid integer",
         "is_staff": "'maybe' is not a valid boolean"
     }
 ```
