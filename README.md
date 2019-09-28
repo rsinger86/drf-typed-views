@@ -1,6 +1,6 @@
 ## Django REST Framework - Typed Views
 
-This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for code that is easier to read and write: view inputs are individually declared, not buried inside all-encompassing `request` objects. You can also write less validation/sanitization code. 
+This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for code that is easier to read and write. Wiew inputs are individually declared, not buried inside all-encompassing `request` objects. Meanwhile, you get even more out of type annotations -- they can replace repetitive validation/sanitization code. 
 
 More features:
 - [Pydantic](https://pydantic-docs.helpmanual.io/) models and [TypeSystem](https://www.encode.io/typesystem/) schemas are compatible types for view parameters. Annotate your POST/PUT functions with them to automatically validate incoming request bodies and hydrate models.
@@ -42,7 +42,6 @@ GET `/users/troll/?registered_after=9999&groups=1&is_staff=maybe`<br>
 * [How It Works: Simple Usage](#how-it-works-simple-usage)
   * [Basic GET Request](#basic-get-request)
   * [Basic POST Request](#basic-post-request)
-  * [Combining Different Parameter Types](##combining-different-parameter-types)
 * [How It Works: Advanced Usage](#how-it-works-advanced-usage)
   * [Additional Validation Rules](#additional-validation-rules)
   * [Nested Body Fields](#nested-body-fields)
@@ -78,7 +77,7 @@ The value of a view parameter will come from...
 - the request body if the view argument is annotated using a class from a supported library for complex object validation (Pydantic, TypeSystem), *or*
 - a query parameter with the same name
 
-Unless a default value is given, the parameter is **required** and a `ValidationError` will be raised if not set.
+Unless a default value is given, the parameter is **required** and a [`ValidationError`](https://www.django-rest-framework.org/api-guide/exceptions/#validationerror) will be raised if not set.
 
 ### Basic GET Request
 ```python
@@ -114,6 +113,8 @@ urlpatterns = [
 ]
 
 from pydantic import BaseModel
+from typed_views import typed_api_view
+
 
 class RoomEnum(str, Enum):
     double = 'double'
@@ -134,10 +135,6 @@ def create_booking(city: str, booking: BookingSchema):
 ```
 
 In this example, `city` will again be populated using the URL path variable. The `booking` parameter is annotated using a supported complex schema class (Pydantic), so it's assumed to come from the request body, which will be read in as JSON, used to hydrate the Pydantic `BookingSchema` and then validated. If validation fails a `ValidationError` will be raised.
-
-### Combining Different Parameter Types
-
-Todo...
 
 ## How It Works: Advanced Usage
 
@@ -219,10 +216,51 @@ You can also use dot-notation to source data multiple levels deep in the JSON pa
 
 ### List Validation
 
+For the basic case of list validation - validating the item type of comma-delimited string - declare the type to get automatic validation/coercion:
 
+```python
+from typed_views import typed_api_view, Query
+
+@typed_api_view(["GET"])
+def search_movies(item_ids: List[int] = [])):
+    print(item_ids)
+
+# GET /movies?items_ids=41,64,3
+# [41, 64, 3]
+```
+
+But you can also specify `min_length` and `max_length`, as well as specify additional rules for the child items -- think Django REST's [ListField](https://www.django-rest-framework.org/api-guide/fields/#listfield).
+
+Import the generic `Param` class and use it to set the rules for the `child` elements:
+
+```python
+from typed_views import typed_api_view, Query, Param
+
+@typed_api_view(["GET"])
+def search_outcomes(
+    scores: List[int] = Query(default=[], child=Param(min_value=0, max_value=100))
+):
+    # ORM logic ...
+
+@typed_api_view(["GET"])
+def search_message(
+    recipients: List[str] = Query(min_length=1, max_length=10, child=Param(format="email"))
+):
+    # ORM logic ...
+```
 
 ### Accessing the Request Object
 
+You probably won't need to access the `request` object directly, as this package will provide its relevant properties as view arguments. However, you can include it as a parameter annotated with its type and it will be injected:
+
+```python
+from rest_framework.request import Request
+from typed_views import typed_api_view
+
+@typed_api_view(["GET"])
+def search_documens(request: Request, q: str = None):
+    # ORM logic ...
+```
 
 ## Request Element Classes
 
