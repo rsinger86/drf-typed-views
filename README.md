@@ -51,6 +51,7 @@ GET `/users/troll/?registered_on=9999&groups=admin&is_staff=maybe`<br>
   * [Query](#query)
   * [Body](#body)
   * [Path](#path)
+  * [CurrentUser](#currentuser)
 * [Supported Types and Validator Rules](#supported-types-and-validator-rules)
   * [int](#int)
   * [float](#float)
@@ -545,5 +546,5 @@ While REST Framework's ModelViewSets and ModelSerializers are very productive wh
 
 ## Inspiration
 
-I first came across type annotations for validation in [API Star](https://github.com/encode/apistar), which has since evolved into an OpenAPI toolkit. This pattern was also offered by [Hug](https://hugapi.github.io/hug/) and [Molten](https://github.com/Bogdanp/molten) (I believe in that order). Furthermore, I've borrowed ideas from [FastAPI](https://github.com/tiangolo/fastapi), specifically its use of default values to declare additional validation rules. Finally, this [blog post](https://instagram-engineering.com/types-for-python-http-apis-an-instagram-story-d3c3a207fdb7) from Instagram's engineering team showed me how decorators can be used to implement these features on view functions.
+I first came across type annotations for validation in [API Star](https://github.com/encode/apistar), which has since evolved into an OpenAPI toolkit. This pattern has also been offered by [Hug](https://hugapi.github.io/hug/) and [Molten](https://github.com/Bogdanp/molten) (I believe in that order). Furthermore, I've borrowed ideas from [FastAPI](https://github.com/tiangolo/fastapi), specifically its use of default values to declare additional validation rules. Finally, this [blog post](https://instagram-engineering.com/types-for-python-http-apis-an-instagram-story-d3c3a207fdb7) from Instagram's engineering team showed me how decorators can be used to implement these features on view functions.
 
