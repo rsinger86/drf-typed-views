@@ -278,8 +278,8 @@ You can specify the part of the request that holds each view parameter by using 
 The `user` parameter will come from the request body and is required because no default is provided. Meanwhile, `optimistic_update` is not required and will be populated from a query parameter with the same name. 
 
 The core arguments to these classes are:
-- `default` (the default value for the parameter, which is required unless set)
-- `source` (if the view parameter has a different name than the value embedded in the request)
+- `default` the default value for the parameter, which is required unless set)
+- `source` if the view parameter has a different name than the one embedded in the request
 
 ### Query
 Use the `source` argument to alias the parameter value. For example, your query parameters can have dashes (`?starting-after=2019-09-09`) can be mapped to a parameter named `starting_after`. Also see this example for how to use `*` for `source` to map all the query parameters to a `dict` that populates a complex schema.
@@ -357,12 +357,24 @@ View parameters annotated with this type will validate and coerce the same value
 ```
 
 ### datetime
+Additional arguments:
+- `input_formats` A list of input formats which may be used to parse the date-time, defaults to Django's `DATETIME_INPUT_FORMATS` settings, which defaults to `['iso-8601']`
+- `default_timezone`  A `pytz.timezone` of the timezone. If not specified, falls back to Django's `USE_TZ` setting.
 
 ### date
+Additional arguments:
+- `input_formats` A list of input formats which may be used to parse the date, defaults to Django's `DATETIME_INPUT_FORMATS` settings, which defaults to `['iso-8601']`
 
 ### time
+Additional arguments:
+- `input_formats` A list of input formats which may be used to parse the time, defaults to Django's `TIME_INPUT_FORMATS` settings, which defaults to `['iso-8601']`
 
 ### timedelta
+Validates strings of the format `'[DD] [HH:[MM:]]ss[.uuuuuu]'` and converts them to a `datetime.timedelta` instance.
+
+Additional arguments:
+- `max_value` Validate that the input duration is no greater than this value.
+- `min_value` Validate that the input duration is no less than this value.
 
 ### List
 
