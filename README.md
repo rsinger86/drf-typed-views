@@ -350,6 +350,11 @@ Additional arguments:
 - .. even more ... accepts the same arguments as [Django REST's `DecimalField`](https://www.django-rest-framework.org/api-guide/fields/#decimalfield)
 
 ### bool
+View parameters annotated with this type will validate and coerce the same values as Django REST's `BooleanField`, including but not limited to the following:
+```python
+    true_values = ["yes", 1, "on", "y", "true"]
+    false_values = ["no", 0, "off", "n", "false"]
+```
 
 ### datetime
 
