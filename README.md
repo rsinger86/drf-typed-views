@@ -67,7 +67,7 @@ GET `/users/troll/?registered_after=9999&groups=1&is_staff=maybe`<br>
   * [typesystem.Schema](#typesystemschema)
   * [pydantic.BaseModel](#pydanticbasemodel)
   * [marshmallow.Schema](#marshmallowschema)
-* [Motivation & Inspiration](#motivationinspiration)
+* [Motivation & Inspiration](#motivation)
 
 ## How It Works: Simple Usage
 
@@ -157,7 +157,33 @@ In this example, `year` is required and must come from the URL path and `title` 
 
 ### Additional Validation Rules
 
-Todo...
+Using the request element class (Query, Path, Body) to set additional validation constraints. You'll find that these keywords are consistent with Django REST's serializer fields.
+
+```python
+from typed_views import typed_api_view, Query, Path
+
+@typed_api_view(["GET"])
+def search_restaurants(
+    year: date = Path(), 
+    rating: int = Query(default=None, min_value=1, max_value=5)
+):
+    # ORM logic here...
+
+
+@typed_api_view(["GET"])
+def get_document(id: str = Path(format="uuid")):
+    # ORM logic here...
+
+
+@typed_api_view(["GET"])
+def search_users(
+    email: str = Query(default=None, format="email"), 
+    ip_address: str = Query(default=None, format="ip"), 
+):
+    # ORM logic here...
+```
+
+See a [full inventory](#supported-types-and-validator-rules) of supported types and additional validation rules.
 
 ### Nested Body Fields
 
