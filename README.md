@@ -55,7 +55,7 @@ GET `/users/troll/?registered_on=9999&groups=admin&is_staff=maybe`<br>
   * [Body](#body)
   * [Path](#path)
   * [CurrentUser](#currentuser)
-* [Supported Types and Validator Rules](#supported-types-and-validator-rules)
+* [Supported Types/Validator Rules](#supported-types-and-validator-rules)
   * [int](#int)
   * [float](#float)
   * [Decimal](#decimal)
