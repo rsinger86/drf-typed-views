@@ -68,6 +68,7 @@ GET `/users/troll/?registered_on=9999&groups=admin&is_staff=maybe`<br>
   * [Enum](#enum)
   * [marshmallow.Schema](#marshmallowschema)
   * [pydantic.BaseModel](#pydanticbasemodel)
+  * [request.user](#requestuser)
 * [Motivation & Inspiration](#motivation)
 
 ## How It Works: Simple Usage
@@ -76,7 +77,7 @@ For many cases, you can rely on some implicit behavior for how different parts o
 
 The value of a view parameter will come from...
 - the URL path if the path variable and the view argument have the same name, *or*:
-- the request body if the view argument is annotated using a class from a supported library for complex object validation (Pydantic, TypeSystem), *or*:
+- the request body if the view argument is annotated using a class from a supported library for complex object validation (Pydantic, MarshMallow), *or*:
 - a query parameter with the same name
 
 Unless a default value is given, the parameter is **required** and a [`ValidationError`](https://www.django-rest-framework.org/api-guide/exceptions/#validationerror) will be raised if not set.
@@ -265,7 +266,7 @@ def search_documens(request: Request, q: str = None):
 ```
 
 ### Interdependent Query Parameter Validation
-Oftentimes, it's useful to validate a combination of query parameters - for instance, a `start_date` shouldn't come after an `end_date`. You can populate a complex schema object (Pydantic or Marshmallow) with a dictionary of query parameters from the `request` object.
+Often, it's useful to validate a combination of query parameters - for instance, a `start_date` shouldn't come after an `end_date`. You can populate a complex schema object (Pydantic or Marshmallow) with a dictionary of query parameters from the `request` object.
 
 ```python
 from marshmallow import Schema, fields, validates_schema, ValidationError
@@ -594,7 +595,7 @@ def create_user(user: User):
     # now have a user instance (assuming ValidationError wasn't raised)
 ```
 
-### CurrentUser
+### request.user
 View parameters that are explicitly sourced from the `CurrentUser` request element class can take some additional keyword arguments, which can implement a very basic form of access control.
 
 Additional arguments:
