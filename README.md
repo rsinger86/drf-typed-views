@@ -277,9 +277,11 @@ You can specify the part of the request that holds each view parameter by using 
 
 The `user` parameter will come from the request body and is required because no default is provided. Meanwhile, `optimistic_update` is not required and will be populated from a query parameter with the same name. 
 
-The core arguments to these classes are:
-- `default` the default value for the parameter, which is required unless set)
+The core keyword arguments to these classes are:
+- `default` the default value for the parameter, which is required unless set
 - `source` if the view parameter has a different name than its key embedded in the request
+
+Passing keywords for additional validation constraints is a *powerful capability* that gets you *almost the same feature set* as Django REST's powerful [serializer fields](https://www.django-rest-framework.org/api-guide/fields/). See a [complete list](#supported-types-and-validator-rule) of validation keywords.
 
 
 ### Query
@@ -296,10 +298,19 @@ Use the `source` argument to alias the parameter value and pass keywords to set 
         # ORM logic here...
 ```
 
-See a [complete list](#supported-types-and-validator-rule) of validation keywords.
-
 ### Body
-By default, the entire request body is used to populate parameters marked with this class (`source="*"`). However, you can specify nested fields in the request body, with support for dot notation.
+By default, the entire request body is used to populate parameters marked with this class(`source="*"`):
+
+```python
+    from typed_views import typed_api_view, Body
+    from my_pydantic_schemas import ResidenceListing
+
+    @typed_api_view(["POST"])
+    def create_listing(residence: ResidenceListing = Body()):
+        # ORM logic ...
+```
+
+However, you can also specify nested fields in the request body, with support for dot notation.
 
 ```python
     """
@@ -313,6 +324,9 @@ By default, the entire request body is used to populate parameters marked with t
             }
         }
     """
+    from typed_views import typed_api_view, Body
+
+    @typed_api_view(["POST"])
     def create_user(
         first_name: str = Body(source="first_name"),
         last_name: str = Body(source="last_name"),
