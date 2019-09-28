@@ -1,11 +1,11 @@
 ## Django REST Framework - Typed Views
 
-This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for code that is easier to read and write. Wiew inputs are individually declared, not buried inside all-encompassing `request` objects. Meanwhile, you get even more out of type annotations -- they can replace repetitive validation/sanitization code. 
+This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for code that is easier to read and write. Wiew inputs are individually declared, not buried inside all-encompassing `request` objects. Meanwhile, you get even more out of type annotations as they can replace repetitive validation/sanitization code. 
 
 More features:
-- [Pydantic](https://pydantic-docs.helpmanual.io/) models and [TypeSystem](https://www.encode.io/typesystem/) schemas are compatible types for view parameters. Annotate your POST/PUT functions with them to automatically validate incoming request bodies and hydrate models.
+- [Pydantic](https://pydantic-docs.helpmanual.io/) models and [TypeSystem](https://www.encode.io/typesystem/) schemas are compatible types for view parameters. Annotate your POST/PUT functions with them to automatically validate incoming request bodies.
 - Advanced validators for more than just the type: `min_value`/`max_value` for numbers
-- Validate string formats: `email`, `uuid` and `ipv4/6`; use Python's native `Enum` for `choices` validation
+- Validate string formats: `email`, `uuid` and `ipv4/6`; use Python's native `Enum` for "choices" validation
 
 Quick example:
 ```python
@@ -279,13 +279,24 @@ The `user` parameter will come from the request body and is required because no 
 
 The core arguments to these classes are:
 - `default` the default value for the parameter, which is required unless set)
-- `source` if the view parameter has a different name than the one embedded in the request
+- `source` if the view parameter has a different name than its key embedded in the request
+
 
 ### Query
-Use the `source` argument to alias the parameter value. For example, your query parameters can have dashes (`?starting-after=2019-09-09`) can be mapped to a parameter named `starting_after`. Also see this example for how to use `*` for `source` to map all the query parameters to a `dict` that populates a complex schema.
+Use the `source` argument to alias the parameter value and pass keywords to set additional constraints. For example, your query parameters can have dashes, but be mapped to a parameter that have underscores:
 
-### Path
-Use the `source` argument to alias a view parameter name.
+```python
+    from typed_views import typed_api_view, Query
+
+    @typed_api_view(["GET"])
+    def search_events(
+        starting_after: date = Query(source="starting-after"),
+        available_tickets: int = Query(default=0, min_value=0)
+    ):
+        # ORM logic here...
+```
+
+See a [complete list](#supported-types-and-validator-rule) of validation keywords.
 
 ### Body
 By default, the entire request body is used to populate parameters marked with this class (`source="*"`). However, you can specify nested fields in the request body, with support for dot notation.
@@ -297,7 +308,7 @@ By default, the entire request body is used to populate parameters marked with t
             "first_name": "Homer",
             "last_name": "Simpson",
             "contact": {
-                "phone_number" : "800-123-456",
+                "phone" : "800-123-456",
                 "fax": "13235551234"
             }
         }
@@ -305,9 +316,20 @@ By default, the entire request body is used to populate parameters marked with t
     def create_user(
         first_name: str = Body(source="first_name"),
         last_name: str = Body(source="last_name"),
-        phone: str = Body(source="contact.phone_number")
+        phone: str = Body(source="contact.phone", min_length=10, max_length=20)
     ):
         # ORM logic ...
+```
+
+### Path
+Use the `source` argument to alias a view parameter name. More commonly, though, you can set additional validation rules for parameters coming from the URL path. 
+
+```python
+    from typed_views import typed_api_view, Query
+
+    @typed_api_view(["GET"])
+    def retrieve_event(id: int = Path(min_value=0, max_value=1000)):
+        # ORM logic here...
 ```
 
 ### CurrentUser
