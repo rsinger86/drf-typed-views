@@ -374,10 +374,26 @@ Additional arguments:
 - `max_value` Validate that the number provided is no greater than this value.
 - `min_value` Validate that the number provided is no less than this value.
 
+```python
+from typed_views import typed_api_view, Query
+
+@typed_api_view(["GET"])
+def search_products(inventory: int = Query(min_value=0)):
+    # ORM logic here...
+```
+
 ### float
 Additional arguments:
 - `max_value` Validate that the number provided is no greater than this value.
 - `min_value` Validate that the number provided is no less than this value.
+
+```python
+from typed_views import typed_api_view, Query
+
+@typed_api_view(["GET"])
+def search_products(price: float = Query(min_value=0)):
+    # ORM logic here...
+```
 
 ### Decimal
 Additional arguments:
@@ -413,14 +429,39 @@ Additional arguments:
 - `min_value` Validate that the input duration is no less than this value.
 
 ### List
+Validates strings of the format `'[DD] [HH:[MM:]]ss[.uuuuuu]'` and converts them to a `datetime.timedelta` instance.
+
+Additional arguments:
+- `min_length` Validates that the list contains no fewer than this number of elements.
+- `max_length` Validates that the list contains no more than this number of elements.
+- `child` Pass keyword constraints via a `Param` instance to to validate the members of the list.
+
+```python
+from typed_views import typed_api_view, Param, Query
+
+@typed_api_view(["GET"])
+def search_contacts(emails: List[str] = Query(max_length=10, child=Param(format="email"))):
+    # ORM logic here...
+```
 
 ### Enum
+Validates that the value of the input is one of a limited set of choices. Think of this as mapping to a Django REST [`ChoiceField`](https://www.django-rest-framework.org/api-guide/fields/#choicefield).
+
+```python
+from typed_views import typed_api_view, Query
+
+class Straws(str, Enum):
+    paper = "paper"
+    plastic = "plastic"
+
+@typed_api_view(["GET"])
+def search_straws(type: Straws = None):
+    # ORM logic here...
+```
 
 ### typesystem.Schema
 
 ### pydantic.BaseModel
-
-### marshmallow.Schema
 
 ## Motivation
 
