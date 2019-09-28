@@ -1,6 +1,6 @@
 ## Django REST Framework - Typed Views
 
-This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for code that is easier to read and write. Wiew inputs are individually declared, not buried inside all-encompassing `request` objects. Meanwhile, you get even more out of type annotations as they can replace repetitive validation/sanitization code. 
+This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for code that is easier to read and write. View inputs are individually declared, not buried inside all-encompassing `request` objects. Meanwhile, you get even more out of type annotations: they can replace repetitive validation/sanitization code. 
 
 More features:
 - [Pydantic](https://pydantic-docs.helpmanual.io/) models and [TypeSystem](https://www.encode.io/typesystem/) schemas are compatible types for view parameters. Annotate your POST/PUT functions with them to automatically validate incoming request bodies.
@@ -17,23 +17,23 @@ class UserType(Enum):
 
 @typed_api_view(["GET"])
 def get_users(
-    type: UserType, registered_after: date = None, groups: List[str] = None, is_staff: bool = None
+    type: UserType, registered_on: date = None, groups: List[str] = [], is_staff: bool = None
 ):
-    print(type, registered_after, login_count__gte, groups, is_staff)
+    print(type, registered_on, login_count__gte, groups, is_staff)
 ```
 
-GET `/users/registered/?registered_after=2019-03-03&groups=admin,manager&is_staff=yes`<br>
+GET `/users/registered/?registered_on=2019-03-03&groups=admin,manager&is_staff=yes`<br>
 Status Code: 200
 ```
-    'registered'  date(2019, 3, 03)   ['admin', 'manager']  True
+    'registered'  date(2019, 3, 3)   ['admin', 'manager']  True
 ```
 
-GET `/users/troll/?registered_after=9999&groups=1&is_staff=maybe`<br>
+GET `/users/troll/?registered_on=9999&groups=1&is_staff=maybe`<br>
 :no_entry_sign: Status Code: 400 *ValidationError raised* 
 ```json
     {
         "type": "`troll` is not a valid for UserType",
-        "registered_after": "'9999' is not a valid date",
+        "registered_on": "'9999' is not a valid date",
         "groups": "1 is not a valid string",
         "is_staff": "'maybe' is not a valid boolean"
     }
@@ -74,7 +74,7 @@ For many cases, you can rely on some implicit behavior for how different parts o
 
 The value of a view parameter will come from...
 - the URL path if the path variable and the view argument have the same name, *or*:
-- the request body if the view argument is annotated using a class from a supported library for complex object validation (Pydantic, TypeSystem), *or*
+- the request body if the view argument is annotated using a class from a supported library for complex object validation (Pydantic, TypeSystem), *or*:
 - a query parameter with the same name
 
 Unless a default value is given, the parameter is **required** and a [`ValidationError`](https://www.django-rest-framework.org/api-guide/exceptions/#validationerror) will be raised if not set.
@@ -154,7 +154,7 @@ In this example, `year` is required and must come from the URL path and `title` 
 
 ### Additional Validation Rules
 
-Using the request element class (Query, Path, Body) to set additional validation constraints. You'll find that these keywords are consistent with Django REST's serializer fields.
+You can use the request element class (Query, Path, Body) to set additional validation constraints. You'll find that these keywords are consistent with Django REST's serializer fields.
 
 ```python
 from typed_views import typed_api_view, Query, Path
@@ -216,7 +216,7 @@ You can also use dot-notation to source data multiple levels deep in the JSON pa
 
 ### List Validation
 
-For the basic case of list validation - validating the item type of comma-delimited string - declare the type to get automatic validation/coercion:
+For the basic case of list validation - validating types within a comma-delimited string - declare the type to get automatic validation/coercion:
 
 ```python
 from typed_views import typed_api_view, Query
@@ -229,7 +229,7 @@ def search_movies(item_ids: List[int] = [])):
 # [41, 64, 3]
 ```
 
-But you can also specify `min_length` and `max_length`, as well as specify additional rules for the child items -- think Django REST's [ListField](https://www.django-rest-framework.org/api-guide/fields/#listfield).
+But you can also specify `min_length` and `max_length`, as well as the `delimiter` and specify additional rules for the child items -- think Django REST's [ListField](https://www.django-rest-framework.org/api-guide/fields/#listfield).
 
 Import the generic `Param` class and use it to set the rules for the `child` elements:
 
@@ -238,7 +238,7 @@ from typed_views import typed_api_view, Query, Param
 
 @typed_api_view(["GET"])
 def search_outcomes(
-    scores: List[int] = Query(default=[], child=Param(min_value=0, max_value=100))
+    scores: List[int] = Query(delimiter="|", child=Param(min_value=0, max_value=100))
 ):
     # ORM logic ...
 
@@ -299,7 +299,7 @@ Use the `source` argument to alias the parameter value and pass keywords to set 
 ```
 
 ### Body
-By default, the entire request body is used to populate parameters marked with this class(`source="*"`):
+By default, the entire request body is used to populate parameters marked with this class (`source="*"`):
 
 ```python
     from typed_views import typed_api_view, Body
