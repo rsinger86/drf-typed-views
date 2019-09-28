@@ -39,6 +39,7 @@ GET `/users/troll/?registered_on=9999&groups=admin&is_staff=maybe`<br>
     }
 ```
 ## Table of Contents
+* [Install & Decorators](#install-&-decorators)
 * [How It Works: Simple Usage](#how-it-works-simple-usage)
   * [Basic GET Request](#basic-get-request)
   * [Basic POST Request](#basic-post-request)
@@ -70,6 +71,14 @@ GET `/users/troll/?registered_on=9999&groups=admin&is_staff=maybe`<br>
   * [pydantic.BaseModel](#pydanticbasemodel)
   * [request.user](#requestuser)
 * [Motivation & Inspiration](#motivation)
+
+## Install & Decorators
+
+```
+pip install rest_typed_views
+```
+
+You can add type annotation-enabled features to either view set methods or function-based views using the `typed_action` and `typed_api_view` decorators. These decorators take the exact same arguments as Django REST's `action` and `api_view`.
 
 ## How It Works: Simple Usage
 
