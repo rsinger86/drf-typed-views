@@ -65,7 +65,6 @@ GET `/users/troll/?registered_on=9999&groups=1&is_staff=maybe`<br>
   * [Enum](#enum)
   * [typesystem.Schema](#typesystemschema)
   * [pydantic.BaseModel](#pydanticbasemodel)
-  * [marshmallow.Schema](#marshmallowschema)
 * [Motivation & Inspiration](#motivation)
 
 ## How It Works: Simple Usage
@@ -485,8 +484,60 @@ def search_straws(type: Straws = None):
 ```
 
 ### typesystem.Schema
+You can annotate view parameters with [TypeSystem schemas](https://www.encode.io/typesystem/) to validate request data and pass an instance of the schema to the view.
+
+```python
+import typesystem
+from typed_views import typed_api_view, Query
+
+class Artist(typesystem.Schema):
+    name = typesystem.String(max_length=100)
+
+class Album(typesystem.Schema):
+    title = typesystem.String(max_length=100)
+    release_date = typesystem.Date()
+    artist = typesystem.Reference(Artist)
+
+"""
+    POST 
+    {
+        "title": "Michael Scott's Greatest Hits",
+        "release_date": "2019-03-03",
+        "artiest": {
+            "name": "Michael Scott"
+        }
+    }
+"""
+@typed_api_view(["POST"])
+def create_album(album: Album):
+    # now have an album instance (assuming ValidationError wasn't raised)
+```
 
 ### pydantic.BaseModel
+You can annotate view parameters with [Pydantic models](https://pydantic-docs.helpmanual.io/) to validate request data and pass an instance of the model to the view.
+
+```python
+from pydantic import BaseModel
+from typed_views import typed_api_view, Query
+
+class User(BaseModel):
+    id: int
+    name: str
+    signup_ts: datetime = None
+    friends: List[int] = []
+
+"""
+    POST 
+    {
+        "id": 24529782,
+        "name": "Michael Scott",
+        "friends": [24529782]
+    }
+"""
+@typed_api_view(["POST"])
+def create_user(user: User):
+    # now have a user instance (assuming ValidationError wasn't raised)
+```
 
 ## Motivation
 
