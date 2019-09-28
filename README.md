@@ -288,22 +288,50 @@ Use the `source` argument to alias the parameter value. For example, your query 
 Use the `source` argument to alias a view parameter name.
 
 ### Body
-By default, the entire request body is used to populate parameters marked with this class (`source="*"`). However, you can use specify nested fields in the request body, with support for dot notation.
+By default, the entire request body is used to populate parameters marked with this class (`source="*"`). However, you can specify nested fields in the request body, with support for dot notation.
 
 ```python
+    """
+        POST  /users/
+        {
+            "first_name": "Homer",
+            "last_name": "Simpson",
+            "contact": {
+                "phone_number" : "800-123-456",
+                "fax": "13235551234"
+            }
+        }
+    """
     def create_user(
         first_name: str = Body(source="first_name"),
         last_name: str = Body(source="last_name"),
         phone: str = Body(source="contact.phone_number")
-    )
+    ):
+        # ORM logic ...
 ```
 
 ### CurrentUser
+
 Todo...
 
 ## Supported Types and Validator Rules
 
 The following native Python types are supported. Depending on the type, you can pass additional validation rules to the request element class (`Query`, `Path`, `Body`). You can think of the type combining with the validation rules to create a Django REST serializer field on the fly -- in fact, that's what happens behind the scenes.
+
+### str
+Additional arguments:
+- `max_length` Validates that the input contains no more than this number of characters.
+- `min_length` Validates that the input contains no fewer than this number of characters.
+- `trim_whitespace` (bool; default `True`) Whether to trim leading and trailing white space.
+- `format` Validates that the string matches a common format; supported values:
+    - `email` validates the text to be a valid e-mail address.
+    - `slug` validates the input against the pattern `[a-zA-Z0-9_-]+`.
+    - `uuid` validates the input is a valid UUID string
+    - `url` validates fully qualified URLs of the form `http://<host>/<path>`
+    - `ip` validates input is a valid IPv4 or IPv6 string
+    - `ipv4` validates input is a valid IPv4 string
+    - `ipv6` validates input is a valid IPv6 string
+    - `file_path` validates that the input corresponds to filenames in a certain directory on the filesystem; allows all the same keyword arguments as Django REST's [`FilePathField`](https://www.django-rest-framework.org/api-guide/fields/#filepathfield)
 
 ### int
 Additional arguments:
@@ -320,8 +348,6 @@ Additional arguments:
 - `max_value` Validate that the number provided is no greater than this value.
 - `min_value` Validate that the number provided is no less than this value.
 - .. even more ... accepts the same arguments as [Django REST's `DecimalField`](https://www.django-rest-framework.org/api-guide/fields/#decimalfield)
-
-### str
 
 ### bool
 
