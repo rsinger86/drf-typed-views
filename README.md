@@ -47,6 +47,8 @@ GET `/users/troll/?registered_on=9999&groups=admin&is_staff=maybe`<br>
   * [Nested Body Fields](#nested-body-fields)
   * [List Validation](#list-validation)
   * [Accessing the Request Object](#accessing-the-request-object)
+  * [Interdependent Query Parameter Validation](#interdependent-query-parameter-validation)
+  * [(Simple) Access Control](#simple-access-control)
 * [Request Element Classes](#request-element-classes)
   * [Query](#query)
   * [Body](#body)
@@ -64,7 +66,7 @@ GET `/users/troll/?registered_on=9999&groups=admin&is_staff=maybe`<br>
   * [timedelta](#timedelta)
   * [List](#list)
   * [Enum](#enum)
-  * [typesystem.Schema](#typesystemschema)
+  * [marshmallow.Schema](#marshmallowschema)
   * [pydantic.BaseModel](#pydanticbasemodel)
 * [Motivation & Inspiration](#motivation)
 
@@ -284,6 +286,10 @@ def search_documens(search_params: SearchParamsSchema = Query(source="*")):
 ```
 
 In this example, `Query(source="*")` is instructing an instance of `SearchParamsSchema` to be populated using all of the query parameters together: `request.query_params.dict()`.  
+
+### (Simple) Access Control
+
+ToDo...
 
 ## Request Element Classes
 
@@ -507,33 +513,33 @@ def search_straws(type: Straws = None):
     # ORM logic here...
 ```
 
-### typesystem.Schema
-You can annotate view parameters with [TypeSystem schemas](https://www.encode.io/typesystem/) to validate request data and pass an instance of the schema to the view.
+### marshmallow.Schema
+You can annotate view parameters with [Marshmallow schemas](https://marshmallow.readthedocs.io/en/stable/) to validate request data and pass an instance of the schema to the view.
 
 ```python
-import typesystem
+from marshmallow import Schema, fields
 from typed_views import typed_api_view, Query
 
-class Artist(typesystem.Schema):
-    name = typesystem.String(max_length=100)
+class ArtistSchema(Schema):
+    name = fields.Str()
 
-class Album(typesystem.Schema):
-    title = typesystem.String(max_length=100)
-    release_date = typesystem.Date()
-    artist = typesystem.Reference(Artist)
+class AlbumSchema(Schema):
+    title = fields.Str()
+    release_date = fields.Date()
+    artist = fields.Nested(ArtistSchema())
 
 """
     POST 
     {
         "title": "Michael Scott's Greatest Hits",
         "release_date": "2019-03-03",
-        "artiest": {
+        "artist": {
             "name": "Michael Scott"
         }
     }
 """
 @typed_api_view(["POST"])
-def create_album(album: Album):
+def create_album(album: AlbumSchema):
     # now have an album instance (assuming ValidationError wasn't raised)
 ```
 
