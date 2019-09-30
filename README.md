@@ -91,14 +91,9 @@ urlpatterns = [
 
 from typed_views import typed_api_view
 
-
 # Example request: /chicago/restaurnts?delivery=yes
 @typed_api_view(["GET"])
-def search_restaurants(
-    city: str,
-    rating: float = None,
-    offers_delivery: bool = None,
-):
+def search_restaurants(city: str, rating: float = None, offers_delivery: bool = None):
     restaurants = Restaurant.objects.filter(city=city)
 
     if rating not None:
@@ -112,9 +107,7 @@ In this example, `city` is required and must be its string. Its value comes from
 
 ### Basic POST Request 
 ```python
-urlpatterns = [
-    url(r"^(?P<city>[\w+])/bookings/", create_booking)
-]
+urlpatterns = [url(r"^(?P<city>[\w+])/bookings/", create_booking)]
 
 from pydantic import BaseModel
 from typed_views import typed_api_view
@@ -198,23 +191,22 @@ class Document(BaseModel):
     title: str
     body: str
 
-
+"""
+    POST
+    {
+        "strict": false,
+        "data": {
+            "title": "A Dark and Stormy Night",
+            "body": "Once upon a time"
+        }
+    }
+"""
 @typed_api_view(["POST"])
 def create_document(
     strict_mode: bool = Body(source="strict"), 
     item: Document = Body(source="data")
 ):
     # ORM logic here...
-```
-This function will expect a body like:
-```json
-{
-    "strict": false,
-    "data": {
-        "title": "A Dark and Stormy Night",
-        "body": "Once upon a time"
-    }
-}
 ```
 You can also use dot-notation to source data multiple levels deep in the JSON payload.
 
@@ -271,7 +263,7 @@ Often, it's useful to validate a combination of query parameters - for instance,
 
 ```python
 from marshmallow import Schema, fields, validates_schema, ValidationError
-from typed_views import 
+from typed_views import typed_api_view
 
 class SearchParamsSchema(Schema):
     start_date = fields.Date()
