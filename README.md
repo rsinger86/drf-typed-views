@@ -11,28 +11,23 @@ Quick example:
 ```python
 from typed_views import typed_api_view
 
-class UserType(Enum):
-    trial = "trial"
-    registered = "registered"
-
 @typed_api_view(["GET"])
 def get_users(
-    type: UserType, registered_on: date = None, groups: List[int] = [], is_staff: bool = None
+    registered_on: date = None, groups: List[int] = [], is_staff: bool = None
 ):
-    print(type, registered_on, login_count__gte, groups, is_staff)
+    print(registered_on, login_count__gte, groups, is_staff)
 ```
 
 GET `/users/registered/?registered_on=2019-03-03&groups=4,5&is_staff=yes`<br>
 Status Code: 200
 ```
-    'registered'  date(2019, 3, 3)   [4, 5]  True
+    date(2019, 3, 3)   [4, 5]  True
 ```
 
-GET `/users/troll/?registered_on=9999&groups=admin&is_staff=maybe`<br>
+GET `/users/?registered_on=9999&groups=admin&is_staff=maybe`<br>
 :no_entry_sign: Status Code: 400 *ValidationError raised* 
 ```json
     {
-        "type": "`troll` is not a valid for UserType",
         "registered_on": "'9999' is not a valid date",
         "groups": "'admin' is not a valid integer",
         "is_staff": "'maybe' is not a valid boolean"
@@ -69,7 +64,6 @@ GET `/users/troll/?registered_on=9999&groups=admin&is_staff=maybe`<br>
   * [Enum](#enum)
   * [marshmallow.Schema](#marshmallowschema)
   * [pydantic.BaseModel](#pydanticbasemodel)
-  * [request.user](#requestuser)
 * [Motivation & Inspiration](#motivation)
 
 ## Install & Decorators
@@ -313,6 +307,8 @@ You can apply some very basic access control by applying some validation rules t
         # Do something with the request.user
 ```
 
+Read more about this [request element class](#current-user-keywords).
+
 ## Request Element Classes
 
 You can specify the part of the request that holds each view parameter by using default function arguments, for example:
@@ -397,7 +393,7 @@ Use the `source` argument to alias a view parameter name. More commonly, though,
         # ORM logic here...
 ```
 
-### CurrentUser
+### CurrentUser <a id="current-user-keywords"></a>
 
 Use this class to have a view parameter populated with the current user of the request. You can even extract fields from the current user using the `source` option.
 
@@ -413,7 +409,22 @@ Use this class to have a view parameter populated with the current user of the r
     def retrieve_something(first_name: str = CurrentUser(source="first_name")):
         # Do something with the request.user's first name
 ```
+You can also pass some additional parameters to the `CurrentUser` request element class to implement simple access control:
+- `member_of` (str) Validates that the current `request.user` is a member of a group with this name
+- `member_of_any` (List[str]) Validates that the current `request.user` is a member of one of these groups
 
+*Using these keyword validators assumes that your `User` model has a many-to-many relationship with `django.contrib.auth.models.Group` via `user.groups`.*
+
+An example:
+
+```python
+from django.contrib.auth.models import User
+from typed_views import typed_api_view, CurrentUser
+
+@typed_api_view(["GET"])
+def do_something(user: User = CurrentUser(member_of="admin")):
+    # now have a user instance (assuming ValidationError wasn't raised)
+```
 ## Supported Types and Validator Rules
 
 The following native Python types are supported. Depending on the type, you can pass additional validation rules to the request element class (`Query`, `Path`, `Body`). You can think of the type combining with the validation rules to create a Django REST serializer field on the fly -- in fact, that's what happens behind the scenes.
@@ -604,25 +615,6 @@ def create_user(user: User):
     # now have a user instance (assuming ValidationError wasn't raised)
 ```
 
-### request.user
-View parameters that are explicitly sourced from the `CurrentUser` request element class can take some additional keyword arguments, which can implement a very basic form of access control.
-
-Additional arguments:
-- `member_of` (str) Validates that the current `request.user` is a member of a group with this name
-- `member_of_any` (List[str]) Validates that the current `request.user` is a member of one of these groups
-
-*Using these keyword validators assumes that your `User` model has a many-to-many relationship with `django.contrib.auth.models.Group` via `user.groups`.*
-
-An example:
-
-```python
-from django.contrib.auth.models import User
-from typed_views import typed_api_view, CurrentUser
-
-@typed_api_view(["GET"])
-def do_something(user: User = CurrentUser(member_of_any=["admin"])):
-    # now have a user instance (assuming ValidationError wasn't raised)
-```
 ## Motivation
 
 While REST Framework's ModelViewSets and ModelSerializers are very productive when building out CRUD resources, I've felt less productive in the framework when developing other types of operations. Serializers are a powerful and flexible way to validate incoming request data, but are not as self-documenting as type annotations. Furthermore, the Django ecosystem is hugely productive and I see no reason why REST Framework cannot take advantage of more Python 3 features.
