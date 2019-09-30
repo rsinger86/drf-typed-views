@@ -74,7 +74,7 @@ You can add type annotation-enabled features to either view set methods or funct
 
 ## How It Works: Simple Usage
 
-For many cases, you can rely on some implicit behavior for how different parts of the request (URL path variables, query parameters, body) map to the parameters of a view function/method. 
+For many cases, you can rely on implicit behavior for how different parts of the request (URL path variables, query parameters, body) map to the parameters of a view function/method. 
 
 The value of a view parameter will come from...
 - the URL path if the path variable and the view argument have the same name, *or*:
@@ -135,9 +135,7 @@ In this example, `city` will again be populated using the URL path variable. The
 
 ## How It Works: Advanced Usage
 
-For more advanced use cases, you can explicitly declare how each parameter's value is sourced from the request -- from the query parameters, path, body or headers -- as well as define additional validation rules.
-
-You import a class named after the request element that is expected to hold the value and assign it to the parameter's default.
+For more advanced use cases, you can explicitly declare how each parameter's value is sourced from the request -- from the query parameters, path, body or headers -- as well as define additional validation rules. You import a class named after the request element that is expected to hold the value and assign it to the parameter's default.
 
 ```python
 from typed_views import typed_api_view, Query, Path
@@ -151,7 +149,7 @@ In this example, `year` is required and must come from the URL path and `title` 
 
 ### Additional Validation Rules
 
-You can use the request element class (Query, Path, Body) to set additional validation constraints. You'll find that these keywords are consistent with Django REST's serializer fields.
+You can use the request element class (`Query`, `Path`, `Body`) to set additional validation constraints. You'll find that these keywords are consistent with Django REST's serializer fields.
 
 ```python
 from typed_views import typed_api_view, Query, Path
@@ -177,7 +175,7 @@ def search_users(
     # ORM logic here...
 ```
 
-See a [full inventory](#supported-types-and-validator-rules) of supported types and additional validation rules.
+View a [full list](#supported-types-and-validator-rules) of supported types and additional validation rules.
 
 ### Nested Body Fields
 
@@ -259,7 +257,7 @@ def search_documens(request: Request, q: str = None):
 ```
 
 ### Interdependent Query Parameter Validation
-Often, it's useful to validate a combination of query parameters - for instance, a `start_date` shouldn't come after an `end_date`. You can populate a complex schema object (Pydantic or Marshmallow) with a dictionary of query parameters from the `request` object.
+Often, it's useful to validate a combination of query parameters - for instance, a `start_date` shouldn't come after an `end_date`. You can use complex schema object (Pydantic or Marshmallow) for this scenario. In the example below, `Query(source="*")` is instructing an instance of `SearchParamsSchema` to be populated/validated using all of the query parameters together: `request.query_params.dict()`.  
 
 ```python
 from marshmallow import Schema, fields, validates_schema, ValidationError
@@ -279,8 +277,6 @@ def search_documens(search_params: SearchParamsSchema = Query(source="*")):
     # ORM logic ...
 ```
 
-In this example, `Query(source="*")` is instructing an instance of `SearchParamsSchema` to be populated using all of the query parameters together: `request.query_params.dict()`.  
-
 ### (Simple) Access Control
 
 You can apply some very basic access control by applying some validation rules to a view parameter sourced from the `CurrentUser` request element class. In the example below, a `ValidationError` will be raised if the `request.user` is not a member of either `super_users` or `admins`.
@@ -297,7 +293,7 @@ You can apply some very basic access control by applying some validation rules t
         # Do something with the request.user
 ```
 
-Read more about this [request element class](#current-user-keywords).
+Read more about the [`Current User` request element class](#current-user-keywords).
 
 ## Request Element Classes
 
@@ -318,7 +314,7 @@ The core keyword arguments to these classes are:
 - `default` the default value for the parameter, which is required unless set
 - `source` if the view parameter has a different name than its key embedded in the request
 
-Passing keywords for additional validation constraints is a *powerful capability* that gets you *almost the same feature set* as Django REST's powerful [serializer fields](https://www.django-rest-framework.org/api-guide/fields/). See a [complete list](#supported-types-and-validator-rule) of validation keywords.
+Passing keywords for additional validation constraints is a *powerful capability* that gets you *almost the same feature set* as Django REST's flexible [serializer fields](https://www.django-rest-framework.org/api-guide/fields/). See a [complete list](#supported-types-and-validator-rule) of validation keywords.
 
 
 ### Query
