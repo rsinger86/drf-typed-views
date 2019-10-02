@@ -32,7 +32,7 @@ GET `/users/?registered_on=9999&groups=admin&is_staff=maybe`<br>
     }
 ```
 ## Table of Contents
-* [Install & Decorators](#install-&-decorators)
+* [Install & Decorators](#install--decorators)
 * [How It Works: Simple Usage](#how-it-works-simple-usage)
   * [Basic GET Request](#basic-get-request)
   * [Basic POST Request](#basic-post-request)
