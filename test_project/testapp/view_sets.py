@@ -1,10 +1,19 @@
+from typing import List
+
+from pydantic import BaseModel
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from rest_typed_views import typed_action
 from test_project.testapp.models import Movie
 from test_project.testapp.serializers import MovieSerializer
-from rest_typed_views import typed_action
+
+
+class Actor(BaseModel):
+    id: int
+    name: str
+    movies: List[int] = []
 
 
 class MovieViewSet(viewsets.ModelViewSet):
@@ -18,6 +27,6 @@ class MovieViewSet(viewsets.ModelViewSet):
         obj = self.get_object()
         return Response({"id": obj.id, "test_qp": test_qp, "title": title})
 
-    @action(detail=True, methods=["get"])
-    def actors(self, request, pk: int):
-        return Response({"hello": "world"})
+    @typed_action(detail=False, methods=["POST"])
+    def actors(self, actor: Actor):
+        return Response(dict(actor))

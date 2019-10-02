@@ -156,7 +156,11 @@ class TypedAPIViewTests(APITestCase):
             response.json(),
             {
                 "user": [
-                    '[\n  {\n    "loc": [\n      "id"\n    ],\n    "msg": "field required",\n    "type": "value_error.missing"\n  }\n]'
+                    {
+                        "loc": "('id',)",
+                        "msg": "field required",
+                        "type": "value_error.missing",
+                    }
                 ]
             },
         )

@@ -10,4 +10,4 @@ class PydanticValidator(object):
         try:
             return self.PydanticModelClass(**data)
         except PydanticValidationError as e:
-            raise ValidationError(e.json())
+            raise ValidationError(e.errors())

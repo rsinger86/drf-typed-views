@@ -127,9 +127,9 @@ class ParamSettings(object):
             "query_param",
             "path",
             "current_user",
-            "header",
-            "cookie",
+            # "header",
+            # "cookie",
         ):
             raise Exception(
-                "'param_type' must be one of: body, query_param, path, current_user, header"
+                "'param_type' must be one of: body, query_param, path, current_user"
             )
