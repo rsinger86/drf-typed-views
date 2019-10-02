@@ -112,4 +112,35 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication"
     ],
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
+}
+
+
+LOGGING = {
+    "disable_existing_loggers": False,
+    "version": 1,
+    "formatters": {"standard": {"format": "%(asctime)s %(levelname)s %(message)s"}},
+    "handlers": {
+        "console": {
+            # logging handler that outputs log messages to terminal
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",  # message level to be written to console
+        }
+    },
+    "loggers": {
+        "": {
+            # this sets root level logger to log debug and higher level
+            # logs to console. All other loggers inherit settings from
+            # root level logger.
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,  # this tells logger to send logging message
+            # to its parent (will send if set to True)
+        },
+        "django.db": {"level": "DEBUG", "handers": ["console"]},
+        "requests": {"handlers": ["console"], "level": "INFO"},
+    },
 }

@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.request import Request
 
-from typed_views.utils import (
+from rest_typed_views.utils import (
     find_request,
     get_default_value,
     get_explicit_param_settings,

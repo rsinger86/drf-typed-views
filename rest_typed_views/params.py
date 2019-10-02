@@ -5,9 +5,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import Field, empty
 from rest_framework.request import Request
 
-from typed_views.param_settings import ParamSettings
-from typed_views.utils import get_nested_value, parse_list_annotation
-from typed_views.validators import CurrentUserValidator, ValidatorFactory
+from rest_typed_views.param_settings import ParamSettings
+from rest_typed_views.utils import get_nested_value, parse_list_annotation
+from rest_typed_views.validators import CurrentUserValidator, ValidatorFactory
 
 
 class Param(object):

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
 if TYPE_CHECKING:
-    from typed_views import ParamSettings
+    from rest_typed_views import ParamSettings
 
 
 class CurrentUserValidator(object):

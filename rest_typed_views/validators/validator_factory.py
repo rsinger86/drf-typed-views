@@ -4,13 +4,13 @@ from typing import Any
 
 from rest_framework import serializers
 
-from typed_views.param_settings import ParamSettings
-from typed_views.utils import (
+from rest_typed_views.param_settings import ParamSettings
+from rest_typed_views.utils import (
     parse_complex_type,
     parse_enum_annotation,
     parse_list_annotation,
 )
-from typed_views.validators import (
+from rest_typed_views.validators import (
     DefaultValidator,
     PydanticValidator,
     TypeSystemValidator,

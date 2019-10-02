@@ -3,16 +3,16 @@ from decimal import Decimal
 from enum import Enum
 from typing import List
 
-from django.contrib.auth.models import User
+import marshmallow
 import typesystem
+from django.contrib.auth.models import User
 from pydantic import BaseModel
 from rest_framework.response import Response
-import marshmallow
-from typed_views import Body, CurrentUser, Param, Path, Query, typed_api_view
+
+from rest_typed_views import Body, CurrentUser, Param, Path, Query, typed_api_view
 
 
 """
-
 http://localhost:8000/logs/2/?title=1231234&price=33.43&latitude=3.333333333333333&is_pretty=no&email=robert@hotmail.com&upper_alpha_string=CAT&identifier=cat&website=https://www.nytimes.com/&identity=e028aa46-8411-4c83-b970-76be868c9413&file=/tmp/test.html&ip=162.254.168.185&timestamp=2019-04-03T10:10&start_date=1200-05-05&start_time=20:19&duration=3%205555:45&bag=paper&numbers=1,2,3
 
 """
@@ -45,7 +45,7 @@ class Booking(typesystem.Schema):
 
 @typed_api_view(["POST"])
 def create_user(user: SuperUser):
-    return Response(user.json())
+    return Response(dict(user))
 
 
 @typed_api_view(["POST"])
@@ -65,7 +65,7 @@ def create_band_member(band_member: BandMemberSchema):
 
 @typed_api_view(["GET"])
 def get_logs(
-    idddd: int = Path(source="id"),
+    myid: int = Path(source="id"),
     latitude: Decimal = Query(decimal_places=20),
     title: str = Query(min_length=6),
     price: float = Query(min_value=6),
@@ -87,8 +87,8 @@ def get_logs(
 ):
 
     return Response(
-        {
-            "idddd": idddd,
+        data={
+            "id": myid,
             "title": title,
             "price": price,
             "latitude": latitude,
@@ -106,5 +106,6 @@ def get_logs(
             "duration": duration,
             "bag_type": bag_type,
             "numbers": numbers,
-        }
+        },
+        status=200,
     )
