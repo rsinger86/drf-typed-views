@@ -1,13 +1,24 @@
 import inspect
 from unittest.mock import MagicMock, patch
 
+from pydantic import BaseModel
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.test import APITestCase
 
-from rest_typed_views import Body
-from rest_typed_views.decorators import get_view_param, transform_view_params
-from rest_typed_views.params import PassThruParam
+from rest_typed_views import Body, CurrentUser, ParamSettings, Path, Query
+from rest_typed_views.decorators import (
+    build_explicit_param,
+    get_view_param,
+    transform_view_params,
+)
+from rest_typed_views.params import (
+    BodyParam,
+    CurrentUserParam,
+    PassThruParam,
+    PathParam,
+    QueryParam,
+)
 
 
 class DecoratorTests(APITestCase):
@@ -56,3 +67,89 @@ class DecoratorTests(APITestCase):
         )
 
         self.assertTrue(isinstance(result, PassThruParam))
+
+    def test_get_view_param_if_implicit_path_param(self):
+        def example_function(pk: int):
+            return
+
+        result = get_view_param(
+            self.get_params(example_function)[0], self.fake_request(), {"pk": 1}
+        )
+
+        self.assertTrue(isinstance(result, PathParam))
+
+    def test_get_view_param_if_implicit_body_param(self):
+        class User(BaseModel):
+            id: int
+            name = "John Doe"
+
+        def example_function(user: User):
+            return
+
+        result = get_view_param(
+            self.get_params(example_function)[0], self.fake_request(), {}
+        )
+
+        self.assertTrue(isinstance(result, BodyParam))
+
+    def test_get_view_param_if_implicit_query_param(self):
+        def example_function(q: str):
+            return
+
+        result = get_view_param(
+            self.get_params(example_function)[0], self.fake_request(), {}
+        )
+
+        self.assertTrue(isinstance(result, QueryParam))
+
+    def test_build_explicit_param_for_query(self):
+        def example_function(q: str = Query()):
+            return
+
+        result = build_explicit_param(
+            self.get_params(example_function)[0],
+            self.fake_request(),
+            ParamSettings(param_type="query_param"),
+            {},
+        )
+
+        self.assertTrue(isinstance(result, QueryParam))
+
+    def test_build_explicit_param_for_path(self):
+        def example_function(q: str = Path()):
+            return
+
+        result = build_explicit_param(
+            self.get_params(example_function)[0],
+            self.fake_request(),
+            ParamSettings(param_type="path"),
+            {},
+        )
+
+        self.assertTrue(isinstance(result, PathParam))
+
+    def test_build_explicit_param_for_body(self):
+        def example_function(q: str = Body()):
+            return
+
+        result = build_explicit_param(
+            self.get_params(example_function)[0],
+            self.fake_request(),
+            ParamSettings(param_type="body"),
+            {},
+        )
+
+        self.assertTrue(isinstance(result, BodyParam))
+
+    def test_build_explicit_param_for_current_user(self):
+        def example_function(q: str = CurrentUser()):
+            return
+
+        result = build_explicit_param(
+            self.get_params(example_function)[0],
+            self.fake_request(),
+            ParamSettings(param_type="current_user"),
+            {},
+        )
+
+        self.assertTrue(isinstance(result, CurrentUserParam))
