@@ -1,4 +1,3 @@
-from marshmallow import ValidationError as MarshMallowValidationError
 from rest_framework.exceptions import ValidationError
 
 
@@ -7,6 +6,8 @@ class MarshMallowValidator(object):
         self.MashMallowSchemaClass = MashMallowSchemaClass
 
     def run_validation(self, data: dict):
+        from marshmallow import ValidationError as MarshMallowValidationError
+
         try:
             return self.MashMallowSchemaClass().load(data)
         except MarshMallowValidationError as err:

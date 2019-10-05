@@ -43,6 +43,7 @@ GET `/users/?registered_on=9999&groups=admin&is_staff=maybe`<br>
   * [Accessing the Request Object](#accessing-the-request-object)
   * [Interdependent Query Parameter Validation](#interdependent-query-parameter-validation)
   * [(Simple) Access Control](#simple-access-control)
+* [Enabling Marshmallow, Pydantic Schemas](#enabling-3rd-party-validators)
 * [Request Element Classes](#request-element-classes)
   * [Query](#query)
   * [Body](#body)
@@ -107,8 +108,13 @@ In this example, `city` is required and must be its string. Its value comes from
 
 ### Basic POST Request 
 ```python
+# urls.py
 urlpatterns = [url(r"^(?P<city>[\w+])/bookings/", create_booking)]
 
+# settings.py
+DRF_TYPED_VIEWS = {"schema_packages": ["pydantic"]}
+
+# views.py
 from pydantic import BaseModel
 from rest_typed_views import typed_api_view
 
@@ -294,6 +300,20 @@ You can apply some very basic access control by applying some validation rules t
 ```
 
 Read more about the [`Current User` request element class](#current-user-keywords).
+
+## Enabling Marshmallow, Pydantic Schemas <a id="enabling-3rd-party-validators"></a>
+
+As an alternative to Django REST's serializers, you can annotate views with [Pydantic](https://pydantic-docs.helpmanual.io/) models or [Marshmallow](https://marshmallow.readthedocs.io/en/stable/) schemas to have their parameters automatically validated and pass an instance of the Pydantic/Marshmallow class to your method/function.
+
+To enable support for third-party libraries for complex object validation, modify your settings:
+
+```python
+DRF_TYPED_VIEWS = {
+    "schema_packages": ["pydantic", "marshmallow"]
+}
+```
+
+These third-party packages must be installed in your virtual environment/runtime.
 
 ## Request Element Classes
 

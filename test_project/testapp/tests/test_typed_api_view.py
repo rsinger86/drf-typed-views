@@ -207,7 +207,9 @@ class TypedAPIViewTests(APITestCase):
             },
             format="json",
         )
+
         self.assertEqual(response.status_code, 400)
+
         self.assertEqual(
             response.json(), {"_data.item": {"room": "This field is required."}}
         )

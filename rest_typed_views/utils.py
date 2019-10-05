@@ -4,12 +4,9 @@ from enum import Enum
 from functools import reduce
 from typing import Any, List, Optional, Tuple
 
-from pydantic import BaseModel as PydanticBaseModel
+from django.conf import settings
 from rest_framework.fields import empty
 from rest_framework.request import Request
-from typesystem import Schema as TypeSystemSchema
-
-from marshmallow import Schema as MarshmallowSchema
 
 from .param_settings import ParamSettings
 
@@ -27,12 +24,28 @@ def parse_enum_annotation(annotation) -> Tuple[bool, List[Any]]:
 
 
 def parse_complex_type(annotation) -> Tuple[bool, Optional[str]]:
-    if inspect.isclass(annotation) and issubclass(annotation, PydanticBaseModel):
-        return True, "pydantic"
-    if inspect.isclass(annotation) and issubclass(annotation, TypeSystemSchema):
-        return True, "typesystem"
-    if inspect.isclass(annotation) and issubclass(annotation, MarshmallowSchema):
-        return True, "marshmallow"
+    if hasattr(settings, "DRF_TYPED_VIEWS"):
+        enabled = settings.DRF_TYPED_VIEWS.get("schema_packages", [])
+    else:
+        enabled = []
+
+    if "pydantic" in enabled:
+        from pydantic import BaseModel as PydanticBaseModel
+
+        if inspect.isclass(annotation) and issubclass(annotation, PydanticBaseModel):
+            return True, "pydantic"
+
+    if "typesystem" in enabled:
+        from typesystem import Schema as TypeSystemSchema
+
+        if inspect.isclass(annotation) and issubclass(annotation, TypeSystemSchema):
+            return True, "typesystem"
+
+    if "marshmallow" in enabled:
+        from marshmallow import Schema as MarshmallowSchema
+
+        if inspect.isclass(annotation) and issubclass(annotation, MarshmallowSchema):
+            return True, "marshmallow"
     return False, None
 
 

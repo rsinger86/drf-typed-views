@@ -1,4 +1,3 @@
-from pydantic import ValidationError as PydanticValidationError
 from rest_framework.exceptions import ValidationError
 
 
@@ -7,6 +6,8 @@ class PydanticValidator(object):
         self.PydanticModelClass = PydanticModelClass
 
     def run_validation(self, data: dict):
+        from pydantic import ValidationError as PydanticValidationError
+
         try:
             return self.PydanticModelClass(**data)
         except PydanticValidationError as e:
