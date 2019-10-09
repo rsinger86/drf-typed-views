@@ -2,7 +2,6 @@ import inspect
 from functools import wraps
 from typing import Any, Dict, List
 
-from pydantic import BaseModel
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
