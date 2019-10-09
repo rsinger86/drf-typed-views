@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-from setuptools import setup
 from codecs import open
+
+from setuptools import find_packages, setup
 
 
 def readme():
@@ -19,11 +20,11 @@ classifiers = [
 ]
 setup(
     name="drf-typed-views",
-    version="0.1.2",
+    version="0.1.3",
     description="Use type annotations for automatic request validation in Django REST Framework",
     author="Robert Singer",
     author_email="robertgsinger@gmail.com",
-    packages=["rest_typed_views"],
+    packages=find_packages(exclude=["test_project*"]),
     url="https://github.com/rsinger86/drf-typed-views",
     license="MIT",
     keywords="django rest type annotations automatic validation validate",
