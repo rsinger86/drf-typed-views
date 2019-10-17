@@ -16,9 +16,7 @@ from rest_typed_views import typed_api_view
 
 @typed_api_view(["GET"])
 def get_users(registered_on: date = None, groups: List[int] = None, is_staff: bool = None):
-    if groups is None:
-        groups = []
-    print(registered_on, login_count__gte, groups, is_staff)
+    print(registered_on, groups, is_staff)
 ```
 
 GET `/users/registered/?registered_on=2019-03-03&groups=4,5&is_staff=yes`<br>
@@ -97,15 +95,15 @@ urlpatterns = [
 
 from rest_typed_views import typed_api_view
 
-# Example request: /chicago/restaurnts?delivery=yes
+# Example request: /chicago/restaurants?delivery=yes
 @typed_api_view(["GET"])
 def search_restaurants(city: str, rating: float = None, offers_delivery: bool = None):
     restaurants = Restaurant.objects.filter(city=city)
 
-    if rating not None:
+    if rating is not None:
         restaurants = restaurants.filter(rating__gte=rating)
 
-    if offers_delivery not None:
+    if offers_delivery is not None:
         restaurants = restaurants.filter(delivery=offers_delivery)
 ```
 
