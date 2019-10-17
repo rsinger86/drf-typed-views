@@ -1,5 +1,8 @@
 ## Django REST Framework - Typed Views
 
+[![Package version](https://badge.fury.io/py/drf-typed-views.svg)](https://pypi.python.org/pypi/drf-typed-views)
+[![Python versions](https://img.shields.io/pypi/status/drf-typed-views.svg)](https://img.shields.io/pypi/status/drf-typed-views.svg/)
+
 This project extends [Django Rest Framework](https://www.django-rest-framework.org/) to allow use of Python's type annotations for automatically validating and casting view parameters. This pattern makes for code that is easier to read and write. View inputs are individually declared, not buried inside all-encompassing `request` objects. Meanwhile, you get even more out of type annotations: they can replace repetitive validation/sanitization code. 
 
 More features:
