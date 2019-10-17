@@ -77,7 +77,7 @@ class BodyParam(Param):
     def _get_raw_value(self):
         if self.settings.source in ("*", None):
             return self.request.data
-        return get_nested_value(self.request.data, self.settings.source, fallback={})
+        return get_nested_value(self.request.data, self.settings.source, fallback=empty)
 
 
 class HeaderParam(Param):
