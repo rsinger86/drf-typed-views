@@ -12,7 +12,9 @@ Quick example:
 from rest_typed_views import typed_api_view
 
 @typed_api_view(["GET"])
-def get_users(registered_on: date = None, groups: List[int] = [], is_staff: bool = None):
+def get_users(registered_on: date = None, groups: List[int] = None, is_staff: bool = None):
+    if groups is None:
+        groups = []
     print(registered_on, login_count__gte, groups, is_staff)
 ```
 
