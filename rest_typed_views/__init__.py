@@ -18,5 +18,9 @@ def Body(*args, **kwargs):
     return ParamSettings("body", *args, **kwargs)
 
 
+def Header(*args, **kwargs):
+    return ParamSettings("header", *args, **kwargs)
+
+
 def Param(*args, **kwargs):
     return ParamSettings(*args, **kwargs)

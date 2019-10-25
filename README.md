@@ -156,6 +156,16 @@ def list_documents(year: date = Path(), title: str = Query(default=None)):
 
 In this example, `year` is required and must come from the URL path and `title` is an optional query parameter because the `default` is set. This is similar to Django REST's [serializer fields](https://www.django-rest-framework.org/api-guide/fields/#core-arguments):  passing a default implies that the filed is not required. 
 
+```python
+from rest_typed_views import typed_api_view, Header
+
+@typed_api_view(["GET"])
+def get_cache_header(cache: str = Header()):
+    # ORM logic here...
+```
+
+In this example, `cache` is required and must come from the headers. 
+
 ### Additional Validation Rules
 
 You can use the request element class (`Query`, `Path`, `Body`) to set additional validation constraints. You'll find that these keywords are consistent with Django REST's serializer fields.

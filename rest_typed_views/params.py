@@ -82,7 +82,10 @@ class BodyParam(Param):
 
 class HeaderParam(Param):
     def _get_raw_value(self):
-        return self.request.data
+        name = self.param.name
+        dashed_name = self.param.name.replace('_', '-')
+        headers_dict = {str(key).lower(): value for key, value in self.request.headers.items()}
+        return headers_dict.get(name) or headers_dict.get(dashed_name)
 
 
 class CurrentUserParam(Param):

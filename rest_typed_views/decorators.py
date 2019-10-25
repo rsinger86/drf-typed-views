@@ -17,7 +17,7 @@ from rest_typed_views.utils import (
 )
 
 from .param_settings import ParamSettings
-from .params import BodyParam, CurrentUserParam, PassThruParam, PathParam, QueryParam
+from .params import BodyParam, CurrentUserParam, PassThruParam, PathParam, QueryParam, HeaderParam
 
 
 def build_explicit_param(
@@ -29,6 +29,8 @@ def build_explicit_param(
         return PathParam(param, request, settings=settings, raw_value=raw_value)
     elif settings.param_type == "body":
         return BodyParam(param, request, settings=settings)
+    elif settings.param_type == "header":
+        return HeaderParam(param, request, settings=settings)
     elif settings.param_type == "current_user":
         return CurrentUserParam(param, request, settings=settings)
     elif settings.param_type == "query_param":

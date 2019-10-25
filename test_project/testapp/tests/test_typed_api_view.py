@@ -165,6 +165,30 @@ class TypedAPIViewTests(APITestCase):
             },
         )
 
+    def test_cache_header_ok(self):
+        url = reverse("get-cache-header")
+        response = self.client.get(
+            url, HTTP_CACHE="no"
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(
+            response.data,
+            "no",
+        )
+
+    def test_cache_header_error(self):
+        url = reverse("get-cache-header")
+        response = self.client.get(
+            url,
+        )
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(
+            response.json(),
+            {'cache': ['This field may not be null.']},
+        )
+
     def test_create_booking_ok(self):
         url = reverse("create-booking")
         response = self.client.post(

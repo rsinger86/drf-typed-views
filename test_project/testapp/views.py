@@ -9,8 +9,7 @@ from django.contrib.auth.models import User
 from pydantic import BaseModel
 from rest_framework.response import Response
 
-from rest_typed_views import Body, CurrentUser, Param, Path, Query, typed_api_view
-
+from rest_typed_views import Body, CurrentUser, Param, Header, Path, Query, typed_api_view
 
 """
 http://localhost:8000/logs/2/?title=1231234&price=33.43&latitude=3.333333333333333&is_pretty=no&email=robert@hotmail.com&upper_alpha_string=CAT&identifier=cat&website=https://www.nytimes.com/&identity=e028aa46-8411-4c83-b970-76be868c9413&file=/tmp/test.html&ip=162.254.168.185&timestamp=2019-04-03T10:10&start_date=1200-05-05&start_time=20:19&duration=3%205555:45&bag=paper&numbers=1,2,3
@@ -51,6 +50,11 @@ def create_user(user: SuperUser):
 @typed_api_view(["POST"])
 def create_booking(booking: Booking = Body(source="_data.item")):
     return Response(dict(booking))
+
+
+@typed_api_view(["GET"])
+def get_cache_header(cache: str = Header()):
+    return Response(cache)
 
 
 class BandMemberSchema(marshmallow.Schema):
