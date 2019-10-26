@@ -71,7 +71,7 @@ GET `/users/?registered_on=9999&groups=admin&is_staff=maybe`<br>
 ## Install & Decorators
 
 ```
-pip install rest_typed_views
+pip install drf-typed-views
 ```
 
 You can add type annotation-enabled features to either `ViewSet` methods or function-based views using the `typed_action` and `typed_api_view` decorators. They take the exact same arguments as Django REST's [`api_view`](https://www.django-rest-framework.org/api-guide/views/#api_view) and [`action`](https://www.django-rest-framework.org/api-guide/viewsets/#marking-extra-actions-for-routing) decorators.
