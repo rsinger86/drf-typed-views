@@ -86,7 +86,7 @@ class ValidatorFactory(object):
         options = {"min_length": settings.min_length, "max_length": settings.max_length}
         if is_optional:
             default = settings.default
-            if isinstance(settings.default, empty):
+            if settings.default == empty:
                 default = []
             options["default"] = default
         if item_type is not Any:
