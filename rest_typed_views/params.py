@@ -51,7 +51,7 @@ class QueryParam(Param):
             key = self.settings.source or self.param.name
             raw = self.request.query_params.get(key, empty)
             raw = empty if raw == "" else raw
-            is_list_type, item_type = parse_list_annotation(self.param.annotation)
+            is_list_type, is_optional, item_type = parse_list_annotation(self.param.annotation)
 
             if raw is not empty and is_list_type:
                 raw = raw.split(self.settings.delimiter)

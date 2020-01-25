@@ -11,10 +11,13 @@ from rest_framework.request import Request
 from .param_settings import ParamSettings
 
 
-def parse_list_annotation(annotation) -> Tuple[bool, Any]:
+def parse_list_annotation(annotation) -> Tuple[bool, bool, Any]:
     if "List[" in str(annotation):
-        return True, annotation.__args__[0]
-    return False, None
+        list_type = annotation.__args__[0]
+        if annotation == Optional[list_type]:
+            return True, True, list_type.__args__[0]
+        return True, False, list_type
+    return False, False, None
 
 
 def parse_enum_annotation(annotation) -> Tuple[bool, List[Any]]:

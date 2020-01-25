@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import Any
 
 from rest_framework import serializers
+from rest_framework.fields import empty
 
 from rest_typed_views.param_settings import ParamSettings
 from rest_typed_views.utils import (
@@ -81,8 +82,13 @@ class ValidatorFactory(object):
             return serializers.IPAddressField(default=settings.default, protocol="both")
 
     @classmethod
-    def make_list_validator(cls, item_type: Any, settings: ParamSettings):
+    def make_list_validator(cls, item_type: Any, is_optional: bool, settings: ParamSettings):
         options = {"min_length": settings.min_length, "max_length": settings.max_length}
+        if is_optional:
+            default = settings.default
+            if isinstance(settings.default, empty):
+                default = []
+            options["default"] = default
         if item_type is not Any:
             options["child"] = ValidatorFactory.make(
                 item_type, settings.child or ParamSettings()
@@ -149,10 +155,10 @@ class ValidatorFactory(object):
         if is_enum_type:
             return serializers.ChoiceField(choices=values)
 
-        is_list_type, item_type = parse_list_annotation(annotation)
+        is_list_type, is_optional, item_type = parse_list_annotation(annotation)
 
         if is_list_type:
-            return cls.make_list_validator(item_type, settings)
+            return cls.make_list_validator(item_type, is_optional, settings)
 
         is_complex_type, package = parse_complex_type(annotation)
 
