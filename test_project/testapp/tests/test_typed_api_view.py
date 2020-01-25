@@ -56,6 +56,8 @@ class TypedAPIViewTests(APITestCase):
                 "duration": datetime.timedelta(12, 143),
                 "bag_type": "paper",
                 "numbers": [1, 2, 3],
+                "optional_numbers": [],
+                "optional_numbers_default": [1, 2, 3, 4],
             },
         )
 
@@ -77,6 +79,8 @@ class TypedAPIViewTests(APITestCase):
                 "duration": "forever",
                 "bag": "scrotum",
                 "numbers": "fiver",
+                "optional_numbers": "fiver",
+                "optional_numbers_default": "fiver",
             },
             format="json",
         )
@@ -112,6 +116,8 @@ class TypedAPIViewTests(APITestCase):
                 ],
                 "bag": ['"scrotum" is not a valid choice.'],
                 "numbers": {"0": ["A valid integer is required."]},
+                "optional_numbers": {"0": ["A valid integer is required."]},
+                "optional_numbers_default": {"0": ["A valid integer is required."]},
             },
         )
 

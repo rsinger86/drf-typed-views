@@ -1,7 +1,7 @@
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 import marshmallow
 import typesystem
@@ -84,6 +84,8 @@ def get_logs(
     duration: timedelta = Query(),
     bag_type: BagOptions = Query(source="bag"),
     numbers: List[int] = Query(child=Param(min_value=0)),
+    optional_numbers: Optional[List[int]] = Query(),
+    optional_numbers_default: Optional[List[int]] = Query(default=[1, 2, 3, 4]),
 ):
 
     return Response(
@@ -106,6 +108,8 @@ def get_logs(
             "duration": duration,
             "bag_type": bag_type,
             "numbers": numbers,
+            "optional_numbers": optional_numbers,
+            "optional_numbers_default": optional_numbers_default,
         },
         status=200,
     )
