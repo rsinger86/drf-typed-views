@@ -1,7 +1,7 @@
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 import marshmallow
 import typesystem
@@ -109,3 +109,9 @@ def get_logs(
         },
         status=200,
     )
+
+
+@typed_api_view(["GET"])
+def test_view(ids: Optional[List[int]] = []):
+
+    return Response(data={"ids": ids}, status=200)
