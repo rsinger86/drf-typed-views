@@ -67,6 +67,7 @@ GET `/users/?registered_on=9999&groups=admin&is_staff=maybe`<br>
   * [Enum](#enum)
   * [marshmallow.Schema](#marshmallowschema)
   * [pydantic.BaseModel](#pydanticbasemodel)
+* [Change Log](#changes)
 * [Motivation & Inspiration](#motivation)
 
 ## Install & Decorators
@@ -654,6 +655,10 @@ class User(BaseModel):
 def create_user(user: User):
     # now have a user instance (assuming ValidationError wasn't raised)
 ```
+
+## Change Log
+
+* February 2, 2020: Adds support for `Header` request parameter. Thanks @bbkgh!
 
 ## Motivation
 
