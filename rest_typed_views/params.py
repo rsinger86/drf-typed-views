@@ -82,10 +82,21 @@ class BodyParam(Param):
 
 class HeaderParam(Param):
     def _get_raw_value(self):
-        name = self.param.name
-        dashed_name = self.param.name.replace('_', '-')
-        headers_dict = {str(key).lower(): value for key, value in self.request.headers.items()}
-        return headers_dict.get(name) or headers_dict.get(dashed_name)
+        headers = {
+            str(key).lower(): value for key, value in self.request.headers.items()
+        }
+
+        if self.settings.source == "*":
+            raw = headers
+        else:
+            if self.settings.source:
+                key = self.settings.source
+            else:
+                key = self.param.name.replace("_", "-").lower()
+
+            raw = headers.get(key)
+
+        return raw
 
 
 class CurrentUserParam(Param):

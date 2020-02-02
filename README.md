@@ -51,6 +51,7 @@ GET `/users/?registered_on=9999&groups=admin&is_staff=maybe`<br>
   * [Query](#query)
   * [Body](#body)
   * [Path](#path)
+  * [Header](#header)
   * [CurrentUser](#currentuser)
 * [Supported Types/Validator Rules](#supported-types-and-validator-rules)
   * [int](#int)
@@ -168,7 +169,7 @@ In this example, `cache` is required and must come from the headers.
 
 ### Additional Validation Rules
 
-You can use the request element class (`Query`, `Path`, `Body`) to set additional validation constraints. You'll find that these keywords are consistent with Django REST's serializer fields.
+You can use the request element class (`Query`, `Path`, `Body`, `Header`) to set additional validation constraints. You'll find that these keywords are consistent with Django REST's serializer fields.
 
 ```python
 from rest_typed_views import typed_api_view, Query, Path
@@ -409,6 +410,26 @@ Use the `source` argument to alias a view parameter name. More commonly, though,
 
     @typed_api_view(["GET"])
     def retrieve_event(id: int = Path(min_value=0, max_value=1000)):
+        # ORM logic here...
+```
+
+### Header
+Use the `Header` request element class to automatically retrieve a value from a header. Underscores in variable names are automatically converted to dashes. 
+
+```python
+    from rest_typed_views import typed_api_view, Header
+
+    @typed_api_view(["GET"])
+    def retrieve_event(id: int, cache_control: str = Header(default="no-cache")):
+        # ORM logic here...
+```
+
+If you prefer, you can explicitly specify the exact header key:
+```python
+    from rest_typed_views import typed_api_view, Header
+
+    @typed_api_view(["GET"])
+    def retrieve_event(id: int, cache_control: str = Header(source="cache-control", default="no-cache")):
         # ORM logic here...
 ```
 
