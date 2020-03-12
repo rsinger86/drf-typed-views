@@ -31,6 +31,7 @@ class ParamSettings(object):
     allow_folders: bool
     protocol: str
     child: Optional["ParamSettings"]
+    allow_empty: Optional[bool]
     member_of: Optional[str]
     member_of_any: List[str]
 
@@ -67,6 +68,7 @@ class ParamSettings(object):
         protocol: str = "both",
         # ListField arg
         child: "ParamSettings" = None,
+        allow_empty: bool = True,
         # Current user validator arg
         member_of: str = None,
         member_of_any: List[str] = [],
@@ -98,6 +100,7 @@ class ParamSettings(object):
         self.allow_folders = allow_folders
         self.protocol = protocol
         self.child = child
+        self.allow_empty = allow_empty
         self.member_of = member_of
         self.member_of_any = member_of_any
 

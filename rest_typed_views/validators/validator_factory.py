@@ -82,7 +82,12 @@ class ValidatorFactory(object):
 
     @classmethod
     def make_list_validator(cls, item_type: Any, settings: ParamSettings):
-        options = {"min_length": settings.min_length, "max_length": settings.max_length}
+        options = {
+            "min_length": settings.min_length,
+            "max_length": settings.max_length,
+            "allow_empty": settings.allow_empty,
+            "default": settings.default,
+        }
         if item_type is not Any:
             options["child"] = ValidatorFactory.make(
                 item_type, settings.child or ParamSettings()

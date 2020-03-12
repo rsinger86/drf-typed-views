@@ -12,7 +12,6 @@ marshmallow==3.2.0
 mccabe==0.6.1
 mypy==0.720
 mypy-extensions==0.4.1
-pkg-resources==0.0.0
 pycodestyle==2.5.0
 pydantic==0.32.2
 pyflakes==2.1.1
