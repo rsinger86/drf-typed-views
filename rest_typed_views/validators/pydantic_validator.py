@@ -14,7 +14,7 @@ class PydanticValidator(object):
         try:
             if isinstance(data, QueryDict):
                 # Note that QueryDict is subclass of dict
-                return self.PydanticModelClass(data.dict())
+                return self.PydanticModelClass(**data.dict())
             return self.PydanticModelClass(**data)
         except PydanticValidationError as e:
             raise ValidationError(e.errors())
