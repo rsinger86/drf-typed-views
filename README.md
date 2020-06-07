@@ -658,6 +658,9 @@ def create_user(user: User):
 
 ## Change Log
 
+* June 7, 2020
+  * Fixes compatability with DRF decorator. Thanks @sjquant!
+  * Makes Django's QueryDict work with Marshmallow and Pydantic validators. Thanks @filwaline!
 * February 2, 2020: Adds support for `Header` request parameter. Thanks @bbkgh!
 
 ## Motivation

@@ -20,7 +20,7 @@ classifiers = [
 ]
 setup(
     name="drf-typed-views",
-    version="0.2.1",
+    version="0.3.0",
     description="Use type annotations for automatic request validation in Django REST Framework",
     author="Robert Singer",
     author_email="robertgsinger@gmail.com",
