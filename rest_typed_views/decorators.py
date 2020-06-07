@@ -1,7 +1,7 @@
 import inspect
-from functools import wraps
 from typing import Any, Dict, List
 
+from rest_framework.views import APIView
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
@@ -18,6 +18,32 @@ from rest_typed_views.utils import (
 
 from .param_settings import ParamSettings
 from .params import BodyParam, CurrentUserParam, PassThruParam, PathParam, QueryParam, HeaderParam
+
+
+
+def wraps_drf(view):
+    def _wraps_drf(func):
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        wrapper.__name__ = view.__name__
+        wrapper.__module__ = view.__module__
+        wrapper.renderer_classes = getattr(
+            view, "renderer_classes", APIView.renderer_classes
+        )
+        wrapper.parser_classes = getattr(view, "parser_classes", APIView.parser_classes)
+        wrapper.authentication_classes = getattr(
+            view, "authentication_classes", APIView.authentication_classes
+        )
+        wrapper.throttle_classes = getattr(
+            view, "throttle_classes", APIView.throttle_classes
+        )
+        wrapper.permission_classes = getattr(
+            view, "permission_classes", APIView.permission_classes
+        )
+        return wrapper
+
+    return _wraps_drf
 
 
 def build_explicit_param(
@@ -111,6 +137,7 @@ def typed_api_view(methods):
         prevalidate(view)
 
         @api_view(methods)
+        @wraps_drf(view)
         def wrapper(*original_args, **original_kwargs):
             original_args = list(original_args)
             request = find_request(original_args)
@@ -129,7 +156,7 @@ def typed_action(**action_kwargs):
         prevalidate(view, for_method=True)
 
         @action(**action_kwargs)
-        @wraps(view)
+        @wraps_drf(view)
         def wrapper(*original_args, **original_kwargs):
             original_args = list(original_args)
             request = find_request(original_args)

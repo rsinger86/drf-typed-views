@@ -1,7 +1,7 @@
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 import marshmallow
 import typesystem
