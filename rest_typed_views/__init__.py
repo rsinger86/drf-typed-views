@@ -1,4 +1,5 @@
 from .decorators import typed_action, typed_api_view
+from .views import TypedAPIView
 from .param_settings import ParamSettings
 
 
