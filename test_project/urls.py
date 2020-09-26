@@ -10,6 +10,7 @@ from test_project.testapp.views import (
     test_view,
 )
 from test_project.testapp.view_sets import MovieViewSet
+from test_project.testapp.view_class import MusicAPIView
 
 router = routers.SimpleRouter()
 
@@ -24,4 +25,5 @@ urlpatterns = [
     url(r"^band-members/", create_band_member, name="create-band-member"),
     url(r"^get-cache-header/", get_cache_header, name="get-cache-header"),
     url(r"^", include(router.urls)),
+    url(r"^musics/", MusicAPIView.as_view(), name="music-list")
 ]
