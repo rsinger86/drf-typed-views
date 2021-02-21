@@ -12,7 +12,7 @@ from .param_settings import ParamSettings
 
 
 def parse_list_annotation(annotation) -> Tuple[bool, Any]:
-    if "List[" in str(annotation):
+    if str(annotation).startswith("List["):
         return True, annotation.__args__[0]
     return False, None
 
