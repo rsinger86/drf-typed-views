@@ -4,7 +4,7 @@ attrs==19.1.0
 black==19.3b0
 Click==7.0
 dataclasses==0.6
-Django==3.0.7
+Django==3.1.9
 djangorestframework==3.11.0
 entrypoints==0.3
 flake8==3.7.8
