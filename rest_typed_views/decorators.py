@@ -28,6 +28,7 @@ def wraps_drf(view):
 
         wrapper.__name__ = view.__name__
         wrapper.__module__ = view.__module__
+        wrapper.__doc__ = view.__doc__
         wrapper.renderer_classes = getattr(
             view, "renderer_classes", APIView.renderer_classes
         )
