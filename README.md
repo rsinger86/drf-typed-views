@@ -1,6 +1,6 @@
 # NOT MAINTAINED 
 
-Use this project instead: (drf-typed)[https://github.com/rsinger86/drf-typed].
+Use this project instead: [drf-typed](https://github.com/rsinger86/drf-typed).
 
 It includes everything this project does, plus it includes typed features for serializers and helpful type stubs.
 
