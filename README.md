@@ -1,3 +1,9 @@
+# NOT MAINTAINED 
+
+Use this project instead: (drf-typed)[https://github.com/rsinger86/drf-typed].
+
+It includes everything this project does, plus it includes typed features for serializers and helpful type stubs.
+
 ## Django REST Framework - Typed Views
 
 [![Package version](https://badge.fury.io/py/drf-typed-views.svg)](https://pypi.python.org/pypi/drf-typed-views)
